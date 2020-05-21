@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/remoteExperimentServer.jar"/>
 	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/weka-src.jar"/>
 	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/opencsv-3.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/SMOTE-1.0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
