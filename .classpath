@@ -2,7 +2,11 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Deliverable/java-json.jar"/>
-	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Deliverable/opencsv-3.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/org.eclipse.jgit-5.7.0.202003110725-r.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/weka.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/java-json.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/remoteExperimentServer.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/weka-src.jar"/>
+	<classpathentry kind="lib" path="C:/Users/melis/Desktop/Desktop/1.Università/Primo_Anno_Magistrale/Secondo semestre/ISW2_Second_Milestone.git/trunk/opencsv-3.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

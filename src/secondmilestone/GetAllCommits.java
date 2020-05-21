@@ -101,7 +101,7 @@ public class GetAllCommits {
              
       public static void main(String[] args) throws JSONException, IOException, ParseException {
     	 
-    	  String endDate = "2010-03-29";  
+    	  String endDate = "2010-04-22";  
     	  String startDate = "2006-08-26";
     	  String projName = "OPENJPA";
     	  String organization = "apache";

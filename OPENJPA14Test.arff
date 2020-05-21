@@ -1,0 +1,14 @@
+@RELATION OPENJPA14TestDataset
+
+@ATTRIBUTE versionname REAL
+@ATTRIBUTE #revision REAL
+@ATTRIBUTE #fixcommit REAL
+@ATTRIBUTE size REAL
+@ATTRIBUTE churn REAL
+@ATTRIBUTE maxchurn REAL
+@ATTRIBUTE avgchurn REAL
+@ATTRIBUTE chgsetsize REAL
+@ATTRIBUTE maxchgsetsize REAL
+@ATTRIBUTE avgchgsetsize REAL
+@ATTRIBUTE buggy {no,yes}
+@DATA

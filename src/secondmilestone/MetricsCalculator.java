@@ -161,11 +161,10 @@ public class MetricsCalculator {
 	public static List<String[]> findBuggyness(String projName, List<String[]> fileRecords) throws Exception {
 		String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
         JSONArray object = new JSONArray(token);
-        int totalRequests = 0;
         int total = object.length();
         System.out.println("Iterazioni per le metriche: " + total);
-        /*
-        for(int i = 0; i< total ; i++) {
+        
+        for(int i = 0; i< 71 ; i++) {
         	System.out.println("Iteration: " + i);
         	String fixCommit =object.getJSONObject(i).getString("FixCommit");
         	updateNumberOfRevision(object.getJSONObject(i),fileRecords);
@@ -177,13 +176,14 @@ public class MetricsCalculator {
         	}
         }
         
+        System.out.println(fileRecords.size());
         for(int i = 0; i < fileRecords.size(); i++) {
         	if(Integer.valueOf(fileRecords.get(i)[2])>0) {
-        		fileRecords.get(i)[7] = String.valueOf(Double.valueOf(fileRecords.get(i)[5])/Double.valueOf(fileRecords.get(i)[2]));
-        		fileRecords.get(i)[10] = String.valueOf(Double.valueOf(fileRecords.get(i)[8])/Double.valueOf(fileRecords.get(i)[2]));
+        		fileRecords.get(i)[7] = String.valueOf(Integer.valueOf(fileRecords.get(i)[5])/Integer.valueOf(fileRecords.get(i)[2]));
+        		fileRecords.get(i)[10] = String.valueOf(Integer.valueOf(fileRecords.get(i)[8])/Integer.valueOf(fileRecords.get(i)[2]));
         	}
         }
-        */
+        /*
         VersionParser vp = new VersionParser();
     	List<String> versionsList = vp.getVersionList(projName);
     	versionsList.remove(versionsList.size()-1);
@@ -200,19 +200,11 @@ public class MetricsCalculator {
         		try {
         			System.out.println("Numero di iterazioni per " + version + " : " + treeSha.length());
                     for ( int i = 0; i < treeSha.length(); i++) {
-                   
-                    	if(totalRequests >=27750) {
-                    		return fileRecords;
-                    		//System.out.println("Sleep");
-                    		//Thread.sleep(3600000);
-                    		
-                    	}
                     	System.out.println("Number: " + i);
                         String type = treeSha.getJSONObject(i).getString("type");
                         if(type.equals("blob") && treeSha.getJSONObject(i).getString("path").contains(".java")) {
                         	//JSONObject infoJson = GithubConnector.readJsonFromUrl(treeSha.getJSONObject(i).getString("url"));
                         	computeLoc(projName,version, treeSha.getJSONObject(i).getString("sha"),treeSha.getJSONObject(i).getString("path"), fileRecords);
-                        	totalRequests++;
                         } 
                      }  
           	      }catch(Exception e) {
@@ -220,7 +212,7 @@ public class MetricsCalculator {
           	      }
         		System.out.println("-----------------------");
         	}
-		
+		*/
 		
         return fileRecords;
 	}
