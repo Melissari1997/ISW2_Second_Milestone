@@ -92,10 +92,10 @@ public class ClassifierEvaluation{
 		}
 	}
 	public static void smote(Instances training, Instances testing, Instances filteredTraining, Instances testingFiltered, String version, String defectiveInTrainingPercent, String defectiveInTestingPercent) throws IOException {
+		try {
 		for(int i = 0; i< 3; i++) {
 			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 			if(i == 0) {
-				try {
 				smote.setInputFormat(training);
 				NaiveBayes nb = new NaiveBayes();
 				fc.setClassifier(nb);
@@ -109,15 +109,9 @@ public class ClassifierEvaluation{
 				fc.setFilter(smote);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			}
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
-				try {
-					smote.setInputFormat(training);
-				
 				fc.setClassifier(rf);
 				fc.setFilter(smote);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -129,13 +123,9 @@ public class ClassifierEvaluation{
 				fc.setFilter(smote);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			}
 			if(i == 2) {
 				IBk ibk2 = new IBk();
-				try {
 				smote.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(smote);
@@ -148,11 +138,10 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
 			}
+		}
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
