@@ -127,32 +127,108 @@ public class ClassifierEvaluation{
 				Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				filterPresence = "Yes";
 				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateNaiveBayes(nb);	
-				writeOnCsv(version,classifierName,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 1) {
 				RandomForest rf = (RandomForest) classifierList.get(i);
 				Evaluation evalResult = evaluator.evaluateRandomForest(rf);
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				filterPresence = "Yes";
 				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateRandomForest(rf);	
-				writeOnCsv(version,classifierName,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 2) {
 				IBk ibk2 = (IBk) classifierList.get(i);
 				Evaluation evalResult = evaluator.evaluateIBk(ibk2);
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				filterPresence = "Yes";
 				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateIBk(ibk2);	
+				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+			}
+		}
+		
+		for(int i = 0; i< 3; i++) {
+			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
+			if(i == 0) {
+				NaiveBayes nb = new NaiveBayes();
+				fc.setClassifier(nb);
+				fc.setFilter(smote);
+				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				String[] extra = {noFilter,samplerSmote};
+				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
+				String[] extra2 = {filterYes,samplerSmote};
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+			}
+			if(i == 1) {
+				RandomForest rf = new RandomForest();
+				fc.setClassifier(rf);
+				fc.setFilter(smote);
+				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				String[] extra = {noFilter,samplerSmote};
+				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
+				String[] extra2 = {filterYes,samplerSmote};
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+			}
+			if(i == 2) {
+				IBk ibk2 = new IBk();
+				fc.setClassifier(ibk2);
+				fc.setFilter(smote);
+				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				String[] extra = {noFilter,samplerSmote};
+				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
+				String[] extra2 = {filterYes,samplerSmote};
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+			}
+		}
+		for(int i = 0; i< 3; i++) {
+			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
+			if(i == 0) {
+				NaiveBayes nb = new NaiveBayes();
+				fc.setClassifier(nb);
+				fc.setFilter(smote);
+				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				String[] extra = {noFilter,samplerOverSampling};
+				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
+				String[] extra2 = {filterYes,samplerOverSampling};
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+			}
+			if(i == 1) {
+				RandomForest rf = new RandomForest();
+				fc.setClassifier(rf);
+				fc.setFilter(smote);
+				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				String[] extra = {noFilter,samplerOverSampling};
+				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
+				String[] extra2 = {filterYes,samplerOverSampling};
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+			}
+			if(i == 2) {
+				IBk ibk2 = new IBk();
+				fc.setClassifier(ibk2);
+				fc.setFilter(smote);
+				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				String[] extra = {noFilter,samplerOverSampling};
+				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
+				String[] extra2 = {filterYes,samplerOverSampling};
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 		}
