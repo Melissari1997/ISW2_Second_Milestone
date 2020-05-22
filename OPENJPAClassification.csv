@@ -61,3 +61,65 @@ Dataset;#Training;Classifier;%training;%defective in training;%defective in test
 ;3;IBK;10;3.953;5.439;Yes;SMOTE;0.99;0.88;0.99;0.93
 ;3;Naive Bayes;10;3.953;5.439;No;Overs Sampling;0.23;0.52;0.25;0.28
 ;3;Naive Bayes;10;3.953;5.439;Yes;Overs Sampling;0.25;0.46;0.29;0.29
+;3;Random Forest;10;3.953;5.439;No;Overs Sampling;0.67;1.00;0.95;0.79
+;3;Random Forest;10;3.953;5.439;Yes;Overs Sampling;0.58;1.00;0.96;0.72
+;3;IBK;10;3.953;5.439;No;Overs Sampling;0.65;1.00;0.74;0.78
+;3;IBK;10;3.953;5.439;Yes;Overs Sampling;0.59;1.00;0.75;0.73
+;3;Naive Bayes;10;3.953;5.439;No;Under Sampling;0.17;0.52;0.23;0.21
+;3;Naive Bayes;10;3.953;5.439;Yes;Under Sampling;0.22;0.57;0.28;0.28
+;3;Random Forest;10;3.953;5.439;No;Under Sampling;0.16;0.99;0.46;0.23
+;3;Random Forest;10;3.953;5.439;Yes;Under Sampling;0.18;0.99;0.35;0.26
+;3;IBK;10;3.953;5.439;No;Under Sampling;0.16;0.99;0.15;0.21
+;3;IBK;10;3.953;5.439;Yes;Under Sampling;0.20;0.99;0.20;0.29
+;4;Naive Bayes;14;4.36;5.412;No;No;0.26;0.39;0.23;0.28
+;4;Naive Bayes;14;4.36;5.412;Yes;No;0.26;0.31;0.24;0.25
+;4;Random Forest;14;4.36;5.412;No;No;0.99;0.83;0.94;0.90
+;4;Random Forest;14;4.36;5.412;Yes;No;0.98;0.77;0.89;0.86
+;4;IBK;14;4.36;5.412;No;No;1.00;0.82;0.96;0.90
+;4;IBK;14;4.36;5.412;Yes;No;0.98;0.77;0.92;0.85
+;4;Naive Bayes;14;4.36;5.412;No;SMOTE;0.27;0.42;0.24;0.29
+;4;Naive Bayes;14;4.36;5.412;Yes;SMOTE;0.26;0.32;0.24;0.25
+;4;Random Forest;14;4.36;5.412;No;SMOTE;0.99;0.82;0.94;0.90
+;4;Random Forest;14;4.36;5.412;Yes;SMOTE;0.98;0.77;0.89;0.85
+;4;IBK;14;4.36;5.412;No;SMOTE;1.00;0.82;0.96;0.90
+;4;IBK;14;4.36;5.412;Yes;SMOTE;0.98;0.77;0.92;0.85
+;4;Naive Bayes;14;4.36;5.412;No;Overs Sampling;0.23;0.44;0.23;0.25
+;4;Naive Bayes;14;4.36;5.412;Yes;Overs Sampling;0.24;0.43;0.25;0.27
+;4;Random Forest;14;4.36;5.412;No;Overs Sampling;0.44;1.00;0.90;0.59
+;4;Random Forest;14;4.36;5.412;Yes;Overs Sampling;0.39;0.96;0.89;0.53
+;4;IBK;14;4.36;5.412;No;Overs Sampling;0.43;1.00;0.69;0.57
+;4;IBK;14;4.36;5.412;Yes;Overs Sampling;0.41;0.95;0.74;0.55
+;4;Naive Bayes;14;4.36;5.412;No;Under Sampling;0.13;0.42;0.13;0.15
+;4;Naive Bayes;14;4.36;5.412;Yes;Under Sampling;0.23;0.46;0.22;0.26
+;4;Random Forest;14;4.36;5.412;No;Under Sampling;0.14;0.99;0.32;0.19
+;4;Random Forest;14;4.36;5.412;Yes;Under Sampling;0.18;0.92;0.26;0.25
+;4;IBK;14;4.36;5.412;No;Under Sampling;0.16;0.97;0.15;0.21
+;4;IBK;14;4.36;5.412;Yes;Under Sampling;0.18;0.91;0.19;0.25
+;5;Naive Bayes;19;4.589;3.624;No;No;0.27;0.37;0.23;0.27
+;5;Naive Bayes;19;4.589;3.624;Yes;No;0.29;0.29;0.23;0.25
+;5;Random Forest;19;4.589;3.624;No;No;0.99;0.80;0.93;0.88
+;5;Random Forest;19;4.589;3.624;Yes;No;0.98;0.72;0.88;0.83
+;5;IBK;19;4.589;3.624;No;No;1.00;0.79;0.95;0.88
+;5;IBK;19;4.589;3.624;Yes;No;0.98;0.72;0.90;0.83
+;5;Naive Bayes;19;4.589;3.624;No;SMOTE;0.27;0.38;0.24;0.28
+;5;Naive Bayes;19;4.589;3.624;Yes;SMOTE;0.29;0.30;0.24;0.26
+;5;Random Forest;19;4.589;3.624;No;SMOTE;1.00;0.79;0.92;0.88
+;5;Random Forest;19;4.589;3.624;Yes;SMOTE;0.96;0.74;0.87;0.83
+;5;IBK;19;4.589;3.624;No;SMOTE;1.00;0.79;0.95;0.88
+;5;IBK;19;4.589;3.624;Yes;SMOTE;0.97;0.73;0.90;0.83
+;5;Naive Bayes;19;4.589;3.624;No;Overs Sampling;0.23;0.43;0.23;0.26
+;5;Naive Bayes;19;4.589;3.624;Yes;Overs Sampling;0.25;0.41;0.24;0.27
+;5;Random Forest;19;4.589;3.624;No;Overs Sampling;0.40;0.99;0.87;0.55
+;5;Random Forest;19;4.589;3.624;Yes;Overs Sampling;0.35;0.96;0.87;0.47
+;5;IBK;19;4.589;3.624;No;Overs Sampling;0.40;0.99;0.72;0.54
+;5;IBK;19;4.589;3.624;Yes;Overs Sampling;0.34;0.96;0.74;0.47
+;5;Naive Bayes;19;4.589;3.624;No;Under Sampling;0.24;0.43;0.21;0.26
+;5;Naive Bayes;19;4.589;3.624;Yes;Under Sampling;0.28;0.43;0.26;0.30
+;5;Random Forest;19;4.589;3.624;No;Under Sampling;0.17;0.97;0.35;0.23
+;5;Random Forest;19;4.589;3.624;Yes;Under Sampling;0.17;0.95;0.30;0.22
+;5;IBK;19;4.589;3.624;No;Under Sampling;0.17;0.96;0.17;0.23
+;5;IBK;19;4.589;3.624;Yes;Under Sampling;0.17;0.92;0.18;0.23
+;6;Naive Bayes;26;4.332;4.913;No;No;0.27;0.37;0.24;0.28
+;6;Naive Bayes;26;4.332;4.913;Yes;No;0.33;0.30;0.28;0.29
+;6;Random Forest;26;4.332;4.913;No;No;1.00;0.81;0.93;0.89
+;6;Random Forest;26;4.332;4.913;Yes;No;0.93;0.68;0.84;0.77
