@@ -41,8 +41,23 @@ public class ClassifierEvaluation{
 	private static final String TESTING = "Testing";
 	private static List<Object> classifiers;
 	
+	public static void writeOnCsv(String version, String classifierName, String defectiveInTrainingPercent, String defectiveInTestingPercent,String[] extra, Evaluation eval) throws IOException {
+		String filter = extra[0];
+		String balancing = extra[1];
+		BigDecimal precision = new BigDecimal(Double.toString(eval.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal recall = new BigDecimal(Double.toString(eval.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal auc = new BigDecimal(Double.toString(eval.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal kappa = new BigDecimal(Double.toString(eval.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, classifierName,String.valueOf(trainingPerc),defectiveInTrainingPercent,defectiveInTestingPercent,filter, balancing,  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		csvWriter.flush();
+		System.out.println(version);
+	}
 	
-	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) {
+	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) throws IOException {
 		String trainingPercent = String.valueOf(trainingPerc);
 		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
 		String defectiveInTestingPercent = String.valueOf(defectiveInTesting);
@@ -94,54 +109,50 @@ public class ClassifierEvaluation{
 		classifierList.add(naiveBayes);
 		classifierList.add(randomForest);
 		classifierList.add(ibk);
+		String naiveB = "Naive Bayes";
+		String randomF = "Random Forest";
+		String ibkStr = "IBK";
+		String noFilter = "No";
+		String filterYes = "Yes";
+		String noSampler = "No";
+		String samplerSmote = "SMOTE";
+		String samplerOverSampling = "Overs Sampling";
+		String samplerUnderSampling = "Under Sampling";
+		
 		for(int i = 0; i < classifierList.size(); i++) {
+			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 			if(i == 0) {
-				classifierName = "Naive Bayes";
-				filterPresence = "No";
-				sampler = "No";
 				NaiveBayes nb = (NaiveBayes) classifierList.get(i);
-				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 				Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
-				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
-				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				String[] extra = {noFilter,noSampler};
+				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				filterPresence = "Yes";
+				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateNaiveBayes(nb);
-				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
-				precision = precision.setScale(2, RoundingMode.HALF_UP);
-				
+				evalResult = evaluator.evaluateNaiveBayes(nb);	
+				writeOnCsv(version,classifierName,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 1) {
-				classifierName = "Random Forest";
-				filterPresence = "No";
-				sampler = "No";
 				RandomForest rf = (RandomForest) classifierList.get(i);
-				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 				Evaluation evalResult = evaluator.evaluateRandomForest(rf);
-				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
-				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				String[] extra = {noFilter,noSampler};
+				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				filterPresence = "Yes";
+				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateRandomForest(rf);
-				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
-				precision = precision.setScale(2, RoundingMode.HALF_UP);
-				
+				evalResult = evaluator.evaluateRandomForest(rf);	
+				writeOnCsv(version,classifierName,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 2) {
-				classifierName = "IBK";
-				filterPresence = "No";
-				sampler = "No";
 				IBk ibk2 = (IBk) classifierList.get(i);
-				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 				Evaluation evalResult = evaluator.evaluateIBk(ibk2);
-				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
-				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				String[] extra = {noFilter,noSampler};
+				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				filterPresence = "Yes";
+				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateIBk(ibk2);
-				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
-				precision = precision.setScale(2, RoundingMode.HALF_UP);
-				
+				evalResult = evaluator.evaluateIBk(ibk2);	
+				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 		}
 		
@@ -539,7 +550,7 @@ public class ClassifierEvaluation{
 			BigDecimal defectiveInTrainingFormatted = new BigDecimal(Double.toString(defectiveInTraining));
 			defectiveInTrainingFormatted = defectiveInTrainingFormatted.setScale(3, RoundingMode.HALF_UP);
 			int majorityPerc = computeMajorityClass(projName, Integer.parseInt(version));
-			evaluation(version,defectiveInTrainingFormatted.doubleValue(),defectiveInTestingFormatted.doubleValue(), majorityPerc, training, testing);
+			evaluation2(version,defectiveInTrainingFormatted.doubleValue(),defectiveInTestingFormatted.doubleValue(), majorityPerc, training, testing);
 
 		}
 		
