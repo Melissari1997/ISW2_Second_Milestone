@@ -7,32 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateTestForDataSet {
-	public static void writeAttributes(BufferedWriter buffWriter) throws IOException {
-		buffWriter.write("@ATTRIBUTE versionname REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE #revision REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE #fixcommit REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE size REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE churn REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE maxchurn REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE avgchurn REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE chgsetsize REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE maxchgsetsize REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE avgchgsetsize REAL");
-	     buffWriter.newLine();
-	     buffWriter.write("@ATTRIBUTE buggy {no,yes}");
-	     buffWriter.newLine();
-	     buffWriter.write("@DATA");
-	     buffWriter.newLine();
-	}
 	public static void createTestDataSet(String projName, int testVersion, List<String[]> fileRecords) throws IOException{
 		FileWriter myWriter = new FileWriter(projName + String.valueOf(testVersion) + "Test.arff");
 		
@@ -48,7 +22,7 @@ public class CreateTestForDataSet {
 	    		 versionsRows.add(record);
 	    	 }	 
 	     }
-	     writeAttributes(buffWriter);
+	     WriteAttibutes.writeAttributes(buffWriter);
 	     for( String[] row : versionsRows) {
 	    	 StringBuilder bld2 = new StringBuilder();
 	    	 for(int i = 1; i < row.length;i++) {
