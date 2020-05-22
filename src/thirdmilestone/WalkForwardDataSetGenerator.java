@@ -14,9 +14,10 @@ import secondmilestone.VersionParser;
 public class WalkForwardDataSetGenerator {
 	public static void createTrainingDataSet(String projName, int trainingVersion, List<String[]> fileRecords) throws IOException {
 		FileWriter myWriter = new FileWriter(projName + String.valueOf(trainingVersion) + "Training.arff");
-		BufferedWriter buffWriter = null;
-		try {
-	     buffWriter = new BufferedWriter(myWriter);
+		//BufferedWriter buffWriter = null;
+		try (
+				BufferedWriter buffWriter = new BufferedWriter(myWriter)
+	     ){
 		
 	     buffWriter.write("@RELATION "+ projName+ trainingVersion + "TrainingDataset");
 	     buffWriter.newLine();
@@ -73,16 +74,15 @@ public class WalkForwardDataSetGenerator {
 	    	 buffWriter.newLine();
 	     }}catch(Exception e) {
 	    	 e.printStackTrace();
-	     }finally {
-	     buffWriter.close();
 	     }
-	}
+	     }
 	
 	public static void createTestDataSet(String projName, int testVersion, List<String[]> fileRecords) throws IOException{
 		FileWriter myWriter = new FileWriter(projName + String.valueOf(testVersion) + "Test.arff");
-		BufferedWriter buffWriter = null;
-		try {
-	     buffWriter = new BufferedWriter(myWriter);
+		
+		try (
+				BufferedWriter buffWriter = new BufferedWriter(myWriter);)
+		{
 	     buffWriter.write("@RELATION " + projName+ testVersion + "TestDataset");
 	     buffWriter.newLine();
 	     buffWriter.newLine();
@@ -128,9 +128,8 @@ public class WalkForwardDataSetGenerator {
 	    	 buffWriter.newLine();
 	     }}catch(Exception e) {
 	    	 e.printStackTrace();
-	     }finally {
-	     buffWriter.close();
 	     }
+	     
 	}
 	
 	public static void main(String[] args) throws IOException {
