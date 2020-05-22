@@ -34,10 +34,10 @@ import weka.classifiers.meta.FilteredClassifier;
 
 public class ClassifierEvaluation{
 	private static int trainingPerc = 0;
-	public static CSVWriter csvWriter = null;
-	public static String projName;
-	public static String training = "Training";
-	public static String testing = "Testing";
+	private static CSVWriter csvWriter = null;
+	private static String projName;
+	private static final String training = "Training";
+	private static final String testing = "Testing";
 	
 	public static void evaluation(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc, List<Object> classifiers, Instances training, Instances testing) throws Exception {
 		
@@ -116,7 +116,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "UnderSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -128,7 +128,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "UnderSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -395,10 +395,7 @@ public class ClassifierEvaluation{
 	public static void main(String[] args) throws Exception{
 		//load datasets
 		String projName = "OPENJPA";
-		CSVWriter csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
-	            CSVWriter.NO_QUOTE_CHARACTER,
-	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-	            CSVWriter.DEFAULT_LINE_END);
+		
 		csvWriter.writeNext(new String[] {"Dataset", "#Training" , "Classifier","%training", "%defective in training", "%defective in testing", "Feature Selection","Balancing", "Precision", "Recall", "AUC", "Kappa"});
 		VersionParser vp = new VersionParser();
 		vp.setProgress(0.5);
