@@ -77,6 +77,7 @@ public class ClassifierEvaluator {
 		return evalClass;
 	}
 	public Evaluation evaluateFilteredClassifier(FilteredClassifier fc) {
+		
 		try {
 			fc.buildClassifier(this.training);
 		} catch (Exception e1) {
