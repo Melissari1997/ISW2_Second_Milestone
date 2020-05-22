@@ -23,11 +23,9 @@ public class ClassifierEvaluator {
 		this.training = training;
 		this.testing = testing;
 	}
-	public void setTraining(Instances training) {
-		this.training = training;
-	}
-	public void setTesting(Instances testing) {
-		this.testing = testing;
+	public void setTestingTraining(Instances testingFiltered, Instances filteredTraining) {
+		this.training = filteredTraining;
+		this.testing = testingFiltered;
 	}
 
 	public Evaluation evaluateNaiveBayes(NaiveBayes naiveBayes) {

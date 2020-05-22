@@ -105,14 +105,13 @@ public class ClassifierEvaluation{
 				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
 				precision = precision.setScale(2, RoundingMode.HALF_UP);
 				filterPresence = "Yes";
-				evaluator.setTesting(testingFiltered);
-				evaluator.setTraining(filteredTraining);
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateNaiveBayes(nb);
 				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
 				precision = precision.setScale(2, RoundingMode.HALF_UP);
 				
 			}
-			if(i == 0) {
+			if(i == 1) {
 				classifierName = "Random Forest";
 				filterPresence = "No";
 				sampler = "No";
@@ -122,9 +121,24 @@ public class ClassifierEvaluation{
 				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
 				precision = precision.setScale(2, RoundingMode.HALF_UP);
 				filterPresence = "Yes";
-				evaluator.setTesting(testingFiltered);
-				evaluator.setTraining(filteredTraining);
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateRandomForest(rf);
+				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
+				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				
+			}
+			if(i == 2) {
+				classifierName = "IBK";
+				filterPresence = "No";
+				sampler = "No";
+				IBk ibk2 = (IBk) classifierList.get(i);
+				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
+				Evaluation evalResult = evaluator.evaluateIBk(ibk2);
+				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
+				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				filterPresence = "Yes";
+				evaluator.setTestingTraining(testingFiltered,filteredTraining);
+				evalResult = evaluator.evaluateIBk(ibk2);
 				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
 				precision = precision.setScale(2, RoundingMode.HALF_UP);
 				
