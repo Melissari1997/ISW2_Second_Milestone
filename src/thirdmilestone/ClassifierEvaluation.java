@@ -26,6 +26,7 @@ import weka.filters.supervised.attribute.AttributeSelection;
 import weka.filters.supervised.instance.Resample;
 import weka.filters.supervised.instance.SMOTE;
 import weka.filters.supervised.instance.SpreadSubsample;
+import weka.knowledgeflow.steps.Classifier;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.meta.FilteredClassifier;
 
@@ -36,11 +37,76 @@ public class ClassifierEvaluation{
 	private static int trainingPerc = 0;
 	private static CSVWriter csvWriter = null;
 	private static String projName;
-	private static final String training = "Training";
-	private static final String testing = "Testing";
+	private static final String TRAINING = "Training";
+	private static final String TESTING = "Testing";
+	private static List<Object> classifiers;
 	
-	public static void evaluation(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc, List<Object> classifiers, Instances training, Instances testing) throws Exception {
+	
+	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) {
+		String trainingPercent = String.valueOf(trainingPerc);
+		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
+		String defectiveInTestingPercent = String.valueOf(defectiveInTesting);
 		
+		NaiveBayes naiveBayes = (NaiveBayes) classifiers.get(0);
+		RandomForest randomForest = (RandomForest) classifiers.get(1);
+		IBk ibk = (IBk) classifiers.get(2);
+		int numAttr = training.numAttributes();
+		training.setClassIndex(numAttr - 1);
+		testing.setClassIndex(numAttr - 1);
+		AttributeSelection filter = new AttributeSelection();
+		CfsSubsetEval eval = new CfsSubsetEval();
+		GreedyStepwise search = new GreedyStepwise();
+		search.setSearchBackwards(true);
+		//set the filter to use the evaluator and search algorithm
+		filter.setEvaluator(eval);
+		filter.setSearch(search);
+		try {
+			filter.setInputFormat(training);
+			Instances filteredTraining;
+			filteredTraining = Filter.useFilter(training, filter);
+			int numAttrFiltered = filteredTraining.numAttributes();
+			filteredTraining.setClassIndex(numAttrFiltered - 1);
+			Instances testingFiltered = Filter.useFilter(testing, filter);
+			testingFiltered.setClassIndex(numAttrFiltered - 1);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Resample resample = new Resample();
+		SpreadSubsample  spreadSubsample = new SpreadSubsample();
+		SMOTE smote = new SMOTE();
+		String[] overSamplingOpts = new String[]{ "-B", "1.0", "-Z", String.valueOf(majorityPerc*2)};
+		String[] underSamplingOpts = new String[]{ "-M", "1.0"};
+		try {
+			resample.setOptions(overSamplingOpts);
+			spreadSubsample.setOptions(underSamplingOpts);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String classifierName = null;
+		String filterPresence = null;
+		String sampler = null;
+		List<Object> classifierList = new ArrayList<>();
+		classifierList.add(naiveBayes);
+		classifierList.add(randomForest);
+		classifierList.add(ibk);
+		for(int i = 0; i < classifierList.size(); i++) {
+			if(i == 0) {
+				classifierName = "Naive Bayes";
+				filterPresence = "No";
+				sampler = "No";
+				NaiveBayes nb = (NaiveBayes) classifierList.get(i);
+				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
+				Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
+				
+				
+			}
+		}
+		
+		
+	}
+	public static void evaluation(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) throws Exception {
 		String trainingPercent = String.valueOf(trainingPerc);
 		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
 		String defectiveInTestingPercent = String.valueOf(defectiveInTesting);
@@ -66,19 +132,21 @@ public class ClassifierEvaluation{
 		filteredTraining.setClassIndex(numAttrFiltered - 1);
 		Instances testingFiltered = Filter.useFilter(testing, filter);
 		testingFiltered.setClassIndex(numAttrFiltered - 1);
-
 		naiveBayes.buildClassifier(training);
 		randomForest.buildClassifier(training);
 		ibk.buildClassifier(training);
 		Evaluation evalClass = new Evaluation(testing);	
+		//Oversampling
 		Resample resample = new Resample();
 		String[] overSamplingOpts = new String[]{ "-B", "1.0", "-Z", String.valueOf(majorityPerc*2)};
 		resample.setOptions(overSamplingOpts);
-		
+		//undersampling
 		FilteredClassifier fc = new FilteredClassifier();
 		SpreadSubsample  spreadSubsample = new SpreadSubsample();
 		String[] underSamplingOpts = new String[]{ "-M", "1.0"};
 		spreadSubsample.setOptions(underSamplingOpts);
+		
+		//SMOTE
 		SMOTE smote = new SMOTE();
 		
 		
@@ -93,6 +161,7 @@ public class ClassifierEvaluation{
 		BigDecimal kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "None", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
 		//Filter & No balancing
 		naiveBayes.buildClassifier(filteredTraining);
 		evalClass.evaluateModel(naiveBayes, testingFiltered);
@@ -312,7 +381,7 @@ public class ClassifierEvaluation{
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
 		
 		
-		
+		csvWriter.flush();
 		
 		
 		
@@ -322,8 +391,8 @@ public class ClassifierEvaluation{
 	
 	public static List<Double> computeDefectivePerc(String projName, int trainingRelease) throws IOException {
 		
-		List<String[]> trainingReleases = getReleases(projName, trainingRelease, training);
-		List<String[]> testingReleases = getReleases(projName, trainingRelease, testing);
+		List<String[]> trainingReleases = getReleases(projName, trainingRelease, TRAINING);
+		List<String[]> testingReleases = getReleases(projName, trainingRelease, TESTING);
 		int defectiveInTraining = 0;
 		int defectiveInTesting = 0;
 		for(String[] info: trainingReleases) {
@@ -349,10 +418,10 @@ public class ClassifierEvaluation{
 		  List<String[]> records = getAllReleases(projName);
 		  List<String[]> releases = new ArrayList<>();
 		  for(String[] record : records) {
-			  if(type.equals("Training") && Integer.valueOf(record[1]) <= release) {  
+			  if(type.equals(TRAINING) && Integer.valueOf(record[1]) <= release) {  
 				  releases.add(record);
 			  }
-			  if(type.equals("Testing") && Integer.valueOf(record[1]) == release + 1) {
+			  if(type.equals(TESTING) && Integer.valueOf(record[1]) == release + 1) {
 				  releases.add(record);
 			  }
 		  }
@@ -369,13 +438,13 @@ public class ClassifierEvaluation{
 	}
 	public static int computeTrainingPerc(String projName, int trainingRelease) throws IOException {
 
-	  List<String[]> trainingReleases = getReleases(projName, trainingRelease,training);
+	  List<String[]> trainingReleases = getReleases(projName, trainingRelease,TRAINING);
 	  List<String[]> records = getAllReleases(projName);
 	  return (int)(((double)trainingReleases.size()/(double)records.size())*100);
 	  
 	}
 	public static int computeMajorityClass(String projName, int trainingRelease) throws IOException {
-		List<String[]> records = getReleases(projName, trainingRelease, testing);
+		List<String[]> records = getReleases(projName, trainingRelease, TESTING);
 		int yes = 0;
 		int no = 0;
 		for(String[] info: records) {
@@ -395,14 +464,17 @@ public class ClassifierEvaluation{
 	public static void main(String[] args) throws Exception{
 		//load datasets
 		String projName = "OPENJPA";
-		
+		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
+	            CSVWriter.NO_QUOTE_CHARACTER,
+	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+	            CSVWriter.DEFAULT_LINE_END);
 		csvWriter.writeNext(new String[] {"Dataset", "#Training" , "Classifier","%training", "%defective in training", "%defective in testing", "Feature Selection","Balancing", "Precision", "Recall", "AUC", "Kappa"});
 		VersionParser vp = new VersionParser();
 		vp.setProgress(0.5);
 		List<String> versionsList = vp.getVersionList(projName);
 		versionsList.remove(versionsList.size()-1);
 		versionsList.remove(versionsList.size()-1);
-		List<Object> classifiers = new ArrayList<>();
+		classifiers = new ArrayList<>();
 		NaiveBayes naiveBayesClassifier = new NaiveBayes();
 		RandomForest randomForestClassifier = new RandomForest();
 		IBk ibkClassifier = new IBk();
@@ -426,9 +498,10 @@ public class ClassifierEvaluation{
 			BigDecimal defectiveInTrainingFormatted = new BigDecimal(Double.toString(defectiveInTraining));
 			defectiveInTrainingFormatted = defectiveInTrainingFormatted.setScale(3, RoundingMode.HALF_UP);
 			int majorityPerc = computeMajorityClass(projName, Integer.parseInt(version));
-			evaluation(version,defectiveInTrainingFormatted.doubleValue(),defectiveInTestingFormatted.doubleValue(), majorityPerc, classifiers, training, testing);
+			evaluation(version,defectiveInTrainingFormatted.doubleValue(),defectiveInTestingFormatted.doubleValue(), majorityPerc, training, testing);
 
 		}
+		
 		csvWriter.close();
 	}
 }
