@@ -38,7 +38,6 @@ public class ClassifierEvaluation{
 	private static String projName;
 	private static final String TRAINING = "Training";
 	private static final String TESTING = "Testing";
-	private static List<Object> classifiers;
 	private static String naiveB = "Naive Bayes";
 	private static String randomF = "Random Forest";
 	private static String ibkStr = "IBK";
@@ -53,40 +52,340 @@ public class ClassifierEvaluation{
 	private static SMOTE smote;
 	private static FilteredClassifier fc;
 	
+	public static void evaluation(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) throws Exception {
+		String trainingPercent = String.valueOf(trainingPerc);
+		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
+		String defectiveInTestingPercent = String.valueOf(defectiveInTesting);
+		
+		NaiveBayes naiveBayes = new NaiveBayes();
+		RandomForest randomForest = new RandomForest();
+		IBk ibk = new IBk();
+		int numAttr = training.numAttributes();
+		training.setClassIndex(numAttr - 1);
+		testing.setClassIndex(numAttr - 1);
+		AttributeSelection filter = new AttributeSelection();
+		CfsSubsetEval eval = new CfsSubsetEval();
+		GreedyStepwise search = new GreedyStepwise();
+		search.setSearchBackwards(true);
+		//set the filter to use the evaluator and search algorithm
+		filter.setEvaluator(eval);
+		filter.setSearch(search);
+		//specify the dataset
+		filter.setInputFormat(training);
+		//apply
+		Instances filteredTraining = Filter.useFilter(training, filter);
+		int numAttrFiltered = filteredTraining.numAttributes();
+		filteredTraining.setClassIndex(numAttrFiltered - 1);
+		Instances testingFiltered = Filter.useFilter(testing, filter);
+		testingFiltered.setClassIndex(numAttrFiltered - 1);
+		naiveBayes.buildClassifier(training);
+		randomForest.buildClassifier(training);
+		ibk.buildClassifier(training);
+		Evaluation evalClass = new Evaluation(testing);	
+		//Oversampling
+		Resample resample = new Resample();
+		String[] overSamplingOpts = new String[]{ "-B", "1.0", "-Z", String.valueOf(majorityPerc*2)};
+		resample.setOptions(overSamplingOpts);
+		//undersampling
+		FilteredClassifier fc = new FilteredClassifier();
+		SpreadSubsample  spreadSubsample = new SpreadSubsample();
+		String[] underSamplingOpts = new String[]{ "-M", "1.0"};
+		spreadSubsample.setOptions(underSamplingOpts);
+		
+		//SMOTE
+		SMOTE smote = new SMOTE();
+		
+		
+		//No filter & No balancing
+		evalClass.evaluateModel(naiveBayes, testing); 
+		BigDecimal precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "None", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		//Filter & No balancing
+		naiveBayes.buildClassifier(filteredTraining);
+		evalClass.evaluateModel(naiveBayes, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "None", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		//No filter & underSample
+		NaiveBayes naiveBayes2 = new NaiveBayes();
+		fc.setClassifier(naiveBayes2);
+		fc.setFilter(spreadSubsample);
+		fc.buildClassifier(training);
+		evalClass.evaluateModel(fc, testing); 
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "UnderSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		//filter & undersample
+		fc.buildClassifier(testingFiltered);
+		evalClass.evaluateModel(fc, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "UnderSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		// No filter & smote
+		NaiveBayes naiveBayes3 = new NaiveBayes();
+		smote.setInputFormat(training);
+		fc.setClassifier(naiveBayes3);
+		fc.setFilter(smote);
+		fc.buildClassifier(training);
+		evalClass.evaluateModel(fc, testing); 
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "SMOTE",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		//filter & smote
+		smote.setInputFormat(filteredTraining);
+		fc.setFilter(smote);
+		fc.buildClassifier(testingFiltered);
+		evalClass.evaluateModel(fc, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "SMOTE",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		// No filter & oversampling
+		NaiveBayes naiveBayes4 = new NaiveBayes();
+		resample.setInputFormat(training);
+		fc.setClassifier(naiveBayes4);
+		fc.setFilter(resample);
+		fc.buildClassifier(training);
+		evalClass.evaluateModel(fc, testing);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		// filter & oversampling
+		resample.setInputFormat(filteredTraining);
+		fc.setFilter(resample);
+		fc.buildClassifier(testingFiltered);
+		evalClass.evaluateModel(fc, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		
+		
+		
+		
+		
+		
+		
+		//No filter & No balancing
+		evalClass.evaluateModel(randomForest, testing); 
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "None",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		//Filter & No balancing
+		randomForest.buildClassifier(filteredTraining);
+		evalClass.evaluateModel(randomForest, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "None",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		//No filter & underSample
+		RandomForest randomForest2 = new RandomForest();
+		fc.setClassifier(randomForest2);
+		fc.setFilter(spreadSubsample);
+		fc.buildClassifier(training);
+		evalClass.evaluateModel(fc, testing); 
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "UnderSampling", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		//filter & undersample
+		fc.buildClassifier(testingFiltered);
+		evalClass.evaluateModel(fc, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "UnderSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		// No filter & smote
+		RandomForest randomForest3 = new RandomForest();
+		smote.setInputFormat(training);
+		fc.setClassifier(randomForest3);
+		fc.setFilter(smote);
+		fc.buildClassifier(training);
+		evalClass.evaluateModel(fc, testing); 
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "SMOTE",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		//filter & smote
+		smote.setInputFormat(filteredTraining);
+		fc.setFilter(smote);
+		fc.buildClassifier(testingFiltered);
+		evalClass.evaluateModel(fc, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "SMOTE", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		// No filter & oversampling
+		RandomForest randomForest4 = new RandomForest();
+		resample.setInputFormat(training);
+		fc.setClassifier(randomForest4);
+		fc.setFilter(resample);
+		fc.buildClassifier(training);
+		evalClass.evaluateModel(fc, testing);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		// filter & oversampling
+		resample.setInputFormat(filteredTraining);
+		fc.setFilter(resample);
+		fc.buildClassifier(testingFiltered);
+		evalClass.evaluateModel(fc, testingFiltered);
+		precision = new BigDecimal(Double.toString(evalClass.precision(1)));
+		precision = precision.setScale(2, RoundingMode.HALF_UP);
+		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
+		recall = recall.setScale(2, RoundingMode.HALF_UP);
+		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
+		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
+		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		
+		
+		csvWriter.flush();
+		
+		
+		
+		
+		
+	}
 	
 	
-	
-	public static void noSampler(Instances training, Instances testing, Instances filteredTraining, Instances testingFiltered, String version, String defectiveInTrainingPercent, String defectiveInTestingPercent) throws IOException {
+	public static void noSampler(Instances training, Instances testing, Instances filteredTraining, Instances testingFiltered, String version, String defectiveInTrainingPercent, String defectiveInTestingPercent) throws Exception {
 		for(int i = 0; i < 3 ; i++) {
 			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 			if(i == 0) {
 				NaiveBayes nb = new NaiveBayes();
-				Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
+				evaluator.setTestingTraining(training, testing);
+				//Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
+				Evaluation evalResult =new Evaluation(testing);
+				nb.buildClassifier(training);
+				evalResult.evaluateModel(nb, testing);
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateNaiveBayes(nb);	
+				//evalResult = evaluator.evaluateNaiveBayes(nb);
+				nb.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(nb, testingFiltered);
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 1) {
+				
+				evaluator.setTestingTraining(testing, training);
 				RandomForest rf = new RandomForest();
-				Evaluation evalResult = evaluator.evaluateRandomForest(rf);
+				//Evaluation evalResult = evaluator.evaluateRandomForest(rf);
+				Evaluation evalResult =new Evaluation(testing);
+				rf.buildClassifier(training);
+				evalResult.evaluateModel(rf, testing); 
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateRandomForest(rf);	
+				//evalResult = evaluator.evaluateRandomForest(rf);
+				rf.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(rf, testingFiltered);
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 2) {
 				IBk ibk2 = new IBk();
-				Evaluation evalResult = evaluator.evaluateIBk(ibk2);
+				evaluator.setTestingTraining(testing, training);
+				//Evaluation evalResult = evaluator.evaluateIBk(ibk2);
+				Evaluation evalResult =new Evaluation(testing);
+				ibk2.buildClassifier(training);
+				evalResult.evaluateModel(ibk2, testing); 
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,noSampler};
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateIBk(ibk2);	
+				//evalResult = evaluator.evaluateIBk(ibk2);	
+				ibk2.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(ibk2, testingFiltered);
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 		}
@@ -113,6 +412,7 @@ public class ClassifierEvaluation{
 			}
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
+				evaluator.setTestingTraining(testing, training);
 				fc.setClassifier(rf);
 				fc.setFilter(smote);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -127,6 +427,7 @@ public class ClassifierEvaluation{
 			}
 			if(i == 2) {
 				IBk ibk2 = new IBk();
+				evaluator.setTestingTraining(testing, training);
 				smote.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(smote);
@@ -152,6 +453,7 @@ public class ClassifierEvaluation{
 			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 			if(i == 0) {
 				NaiveBayes nb = new NaiveBayes();
+				evaluator.setTestingTraining(testing, training);
 				resample.setInputFormat(training);
 				fc.setClassifier(nb);
 				fc.setFilter(resample);
@@ -168,6 +470,7 @@ public class ClassifierEvaluation{
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
 				resample.setInputFormat(training);
+				evaluator.setTestingTraining(testing, training);
 				fc.setClassifier(rf);
 				fc.setFilter(resample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -187,6 +490,7 @@ public class ClassifierEvaluation{
 				resample.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(resample);
+				evaluator.setTestingTraining(testing, training);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
 				String[] extra = {noFilter,samplerOverSampling};
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
@@ -212,6 +516,7 @@ public class ClassifierEvaluation{
 				NaiveBayes nb = new NaiveBayes();
 				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(nb);
+				evaluator.setTestingTraining(testing, training);
 				fc.setFilter(spreadSubsample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
 				String[] extra = {noFilter,samplerUnderSampling};
@@ -226,6 +531,7 @@ public class ClassifierEvaluation{
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
 				spreadSubsample.setInputFormat(training);
+				evaluator.setTestingTraining(testing, training);
 				fc.setClassifier(rf);
 				fc.setFilter(spreadSubsample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -241,6 +547,7 @@ public class ClassifierEvaluation{
 			
 			if(i == 2) {
 				IBk ibk2 = new IBk();
+				evaluator.setTestingTraining(testing, training);
 				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(spreadSubsample);
@@ -279,13 +586,9 @@ public class ClassifierEvaluation{
 		System.out.println(version);
 	}
 	
-	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) throws IOException {
+	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) throws Exception {
 		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
 		String defectiveInTestingPercent = String.valueOf(defectiveInTesting);
-		
-		NaiveBayes naiveBayes = (NaiveBayes) classifiers.get(0);
-		RandomForest randomForest = (RandomForest) classifiers.get(1);
-		IBk ibk = (IBk) classifiers.get(2);
 		int numAttr = training.numAttributes();
 		training.setClassIndex(numAttr - 1);
 		testing.setClassIndex(numAttr - 1);
@@ -300,7 +603,6 @@ public class ClassifierEvaluation{
 		Instances testingFiltered = null;
 		try {
 			filter.setInputFormat(training);
-			
 			filteredTraining = Filter.useFilter(training, filter);
 			int numAttrFiltered = filteredTraining.numAttributes();
 			filteredTraining.setClassIndex(numAttrFiltered - 1);
@@ -323,273 +625,10 @@ public class ClassifierEvaluation{
 			e.printStackTrace();
 		}
 		fc = new FilteredClassifier();
-		List<Object> classifierList = new ArrayList<>();
-		classifierList.add(naiveBayes);
-		classifierList.add(randomForest);
-		classifierList.add(ibk);
 		noSampler(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
 		smote(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
 		overSampling(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
 		underSampling(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
-		/*
-		for(int i = 0; i < classifierList.size(); i++) {
-			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
-			if(i == 0) {
-				NaiveBayes nb = (NaiveBayes) classifierList.get(i);
-				Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
-				String[] extra = {noFilter,noSampler};
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,noSampler};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateNaiveBayes(nb);	
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			if(i == 1) {
-				RandomForest rf = (RandomForest) classifierList.get(i);
-				Evaluation evalResult = evaluator.evaluateRandomForest(rf);
-				String[] extra = {noFilter,noSampler};
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,noSampler};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateRandomForest(rf);	
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			if(i == 2) {
-				IBk ibk2 = (IBk) classifierList.get(i);
-				Evaluation evalResult = evaluator.evaluateIBk(ibk2);
-				String[] extra = {noFilter,noSampler};
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,noSampler};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateIBk(ibk2);	
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-		}
-		
-		for(int i = 0; i< 3; i++) {
-			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
-			if(i == 0) {
-				try {
-					smote.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				NaiveBayes nb = new NaiveBayes();
-				fc.setClassifier(nb);
-				fc.setFilter(smote);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerSmote};
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerSmote};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				try {
-					smote.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(smote);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			if(i == 1) {
-				RandomForest rf = new RandomForest();
-				try {
-					smote.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(rf);
-				fc.setFilter(smote);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerSmote};
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerSmote};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				try {
-					smote.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(smote);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			if(i == 2) {
-				IBk ibk2 = new IBk();
-				try {
-					smote.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(ibk2);
-				fc.setFilter(smote);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerSmote};
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerSmote};
-				try {
-					smote.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(smote);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-		}
-		
-		
-		for(int i = 0; i< 3; i++) {
-			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
-			if(i == 0) {
-				NaiveBayes nb = new NaiveBayes();
-				try {
-					resample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(nb);
-				fc.setFilter(resample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerOverSampling};
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerOverSampling};
-				try {
-					resample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(resample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			if(i == 1) {
-				RandomForest rf = new RandomForest();
-				try {
-					resample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(rf);
-				fc.setFilter(resample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerOverSampling};
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerOverSampling};
-				try {
-					resample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(resample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			
-			if(i == 2) {
-				IBk ibk2 = new IBk();
-				try {
-					resample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(ibk2);
-				fc.setFilter(resample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerOverSampling};
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerOverSampling};
-				try {
-					resample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(resample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-		}
-		
-		for(int i = 0; i< 3; i++) {
-			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
-			if(i == 0) {
-				NaiveBayes nb = new NaiveBayes();
-				try {
-					spreadSubsample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(nb);
-				fc.setFilter(spreadSubsample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerUnderSampling};
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerUnderSampling};
-				try {
-					spreadSubsample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(spreadSubsample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			if(i == 1) {
-				RandomForest rf = new RandomForest();
-				try {
-					spreadSubsample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(rf);
-				fc.setFilter(spreadSubsample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerUnderSampling};
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerUnderSampling};
-				try {
-					spreadSubsample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(spreadSubsample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-			
-			if(i == 2) {
-				IBk ibk2 = new IBk();
-				try {
-					spreadSubsample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setClassifier(ibk2);
-				fc.setFilter(spreadSubsample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
-				String[] extra = {noFilter,samplerUnderSampling};
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
-				String[] extra2 = {filterYes,samplerUnderSampling};
-				try {
-					spreadSubsample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fc.setFilter(spreadSubsample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
-				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-			}
-		}
-		*/
-		
-		
 	}
 	
 	
@@ -667,8 +706,8 @@ public class ClassifierEvaluation{
 	}
 	public static void main(String[] args) throws Exception{
 		//load datasets
-		String projName = "OPENJPA";
-		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
+		projName = "OPENJPA";
+		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification2.csv"),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
 	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 	            CSVWriter.DEFAULT_LINE_END);
@@ -678,14 +717,6 @@ public class ClassifierEvaluation{
 		List<String> versionsList = vp.getVersionList(projName);
 		versionsList.remove(versionsList.size()-1);
 		versionsList.remove(versionsList.size()-1);
-		classifiers = new ArrayList<>();
-		NaiveBayes naiveBayesClassifier = new NaiveBayes();
-		RandomForest randomForestClassifier = new RandomForest();
-		IBk ibkClassifier = new IBk();
-		
-		classifiers.add(naiveBayesClassifier);
-		classifiers.add(randomForestClassifier);
-		classifiers.add(ibkClassifier);
 		for(String version : versionsList) {
 			
 			DataSource source1 = new DataSource(projName + version + "Training.arff");
