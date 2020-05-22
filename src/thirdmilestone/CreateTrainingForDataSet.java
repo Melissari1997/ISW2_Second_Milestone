@@ -32,7 +32,7 @@ public class CreateTrainingForDataSet {
 	    	 }
 	    	 
 	     }
-	     WriteAttibutes.writeAttributes(buffWriter);
+	     WriteAttributes.writeAttributes(buffWriter);
 	     for( String[] versionRow : versionsRows) {
 	    	 StringBuilder builder2 = new StringBuilder();
 	    	 for(int i = 1; i < versionRow.length;i++) {

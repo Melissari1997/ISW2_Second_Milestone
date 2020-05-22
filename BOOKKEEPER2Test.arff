@@ -1,6 +1,6 @@
 @RELATION BOOKKEEPER2TestDataset
 
-@ATTRIBUTE versionname REAL
+@ATTRIBUTE REAL REAL
 @ATTRIBUTE #revision REAL
 @ATTRIBUTE #fixcommit REAL
 @ATTRIBUTE size REAL
@@ -11,6 +11,7 @@
 @ATTRIBUTE maxchgsetsize REAL
 @ATTRIBUTE avgchgsetsize REAL
 @ATTRIBUTE buggy {no,yes}
+
 @DATA
 3,0,0,215,0,0,0,0,0,0,no
 3,0,0,270,0,0,0,0,0,0,yes

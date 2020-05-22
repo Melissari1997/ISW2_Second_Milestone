@@ -22,7 +22,7 @@ public class CreateTestForDataSet {
 	    		 versionsRows.add(record);
 	    	 }	 
 	     }
-	     WriteAttibutes.writeAttributes(buffWriter);
+	     WriteAttributes.writeAttributes(buffWriter);
 	     for( String[] row : versionsRows) {
 	    	 StringBuilder bld2 = new StringBuilder();
 	    	 for(int i = 1; i < row.length;i++) {
