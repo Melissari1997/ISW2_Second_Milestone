@@ -87,6 +87,7 @@ public class ClassifierEvaluation{
 		String classifierName = null;
 		String filterPresence = null;
 		String sampler = null;
+		FilteredClassifier fc = new FilteredClassifier();
 		List<Object> classifierList = new ArrayList<>();
 		classifierList.add(naiveBayes);
 		classifierList.add(randomForest);

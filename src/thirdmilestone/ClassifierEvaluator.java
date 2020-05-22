@@ -31,6 +31,11 @@ public class ClassifierEvaluator {
 	}
 
 	public Evaluation evaluateNaiveBayes(NaiveBayes naiveBayes) {
+		try {
+			naiveBayes.buildClassifier(this.training);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		Evaluation evalClass = null;
 		try {
 			evalClass = new Evaluation(this.testing);
@@ -42,6 +47,11 @@ public class ClassifierEvaluator {
 		return evalClass;
 	}
 	public Evaluation evaluateRandomForest(RandomForest randomForest) {
+		try {
+			randomForest.buildClassifier(this.training);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		Evaluation evalClass = null;
 		try {
 			evalClass = new Evaluation(this.testing);
@@ -53,6 +63,11 @@ public class ClassifierEvaluator {
 		return evalClass;
 	}
 	public Evaluation evaluateIBk(IBk ibk) {
+		try {
+			ibk.buildClassifier(this.training);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		Evaluation evalClass = null;
 		try {
 			evalClass = new Evaluation(this.testing);
