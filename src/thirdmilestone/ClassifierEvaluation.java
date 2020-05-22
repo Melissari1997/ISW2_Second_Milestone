@@ -219,6 +219,7 @@ public class ClassifierEvaluation{
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
+			
 			if(i == 2) {
 				IBk ibk2 = new IBk();
 				fc.setClassifier(ibk2);
