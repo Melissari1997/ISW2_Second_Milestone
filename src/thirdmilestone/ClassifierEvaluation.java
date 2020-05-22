@@ -60,13 +60,15 @@ public class ClassifierEvaluation{
 		//set the filter to use the evaluator and search algorithm
 		filter.setEvaluator(eval);
 		filter.setSearch(search);
+		Instances filteredTraining = null;
+		Instances testingFiltered = null;
 		try {
 			filter.setInputFormat(training);
-			Instances filteredTraining;
+			
 			filteredTraining = Filter.useFilter(training, filter);
 			int numAttrFiltered = filteredTraining.numAttributes();
 			filteredTraining.setClassIndex(numAttrFiltered - 1);
-			Instances testingFiltered = Filter.useFilter(testing, filter);
+			testingFiltered = Filter.useFilter(testing, filter);
 			testingFiltered.setClassIndex(numAttrFiltered - 1);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -100,7 +102,31 @@ public class ClassifierEvaluation{
 				NaiveBayes nb = (NaiveBayes) classifierList.get(i);
 				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 				Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
+				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
+				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				filterPresence = "Yes";
+				evaluator.setTesting(testingFiltered);
+				evaluator.setTraining(filteredTraining);
+				evalResult = evaluator.evaluateNaiveBayes(nb);
+				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
+				precision = precision.setScale(2, RoundingMode.HALF_UP);
 				
+			}
+			if(i == 0) {
+				classifierName = "Random Forest";
+				filterPresence = "No";
+				sampler = "No";
+				RandomForest rf = (RandomForest) classifierList.get(i);
+				ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
+				Evaluation evalResult = evaluator.evaluateRandomForest(rf);
+				BigDecimal precision = new BigDecimal(Double.toString(evalResult.precision(1)));
+				precision = precision.setScale(2, RoundingMode.HALF_UP);
+				filterPresence = "Yes";
+				evaluator.setTesting(testingFiltered);
+				evaluator.setTraining(filteredTraining);
+				evalResult = evaluator.evaluateRandomForest(rf);
+				precision = new BigDecimal(Double.toString(evalResult.precision(1)));
+				precision = precision.setScale(2, RoundingMode.HALF_UP);
 				
 			}
 		}
