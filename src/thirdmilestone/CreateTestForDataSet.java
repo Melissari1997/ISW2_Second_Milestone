@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateTestForDataSet {
+	private  CreateTestForDataSet() {
+		
+	}
+	
 	public static void createTestDataSet(String projName, int testVersion, List<String[]> fileRecords) throws IOException{
 		FileWriter myWriter = new FileWriter(projName + String.valueOf(testVersion) + "Test.arff");
 		

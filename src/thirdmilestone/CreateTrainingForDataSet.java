@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreateTrainingForDataSet {
+	private  CreateTrainingForDataSet() {
+		
+	}
 	public static void createTrainingDataSet(String projName, int trainingVersion, List<String[]> fileRecords) throws IOException {
 		FileWriter myWriter = new FileWriter(projName + String.valueOf(trainingVersion) + "Training.arff");
 		try (
