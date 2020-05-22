@@ -109,6 +109,7 @@ public class ClassifierEvaluation{
 				fc.setFilter(smote);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
+
 			}
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
@@ -146,11 +147,11 @@ public class ClassifierEvaluation{
 	}
 	
 	public static void overSampling(Instances training, Instances testing, Instances filteredTraining, Instances testingFiltered, String version, String defectiveInTrainingPercent, String defectiveInTestingPercent) throws IOException{
+		try {
 		for(int i = 0; i< 3; i++) {
 			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 			if(i == 0) {
 				NaiveBayes nb = new NaiveBayes();
-				try {
 				resample.setInputFormat(training);
 				fc.setClassifier(nb);
 				fc.setFilter(resample);
@@ -163,16 +164,10 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
 			}
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
-				try {
-					resample.setInputFormat(training);
-				
+				resample.setInputFormat(training);
 				fc.setClassifier(rf);
 				fc.setFilter(resample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -184,46 +179,38 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}	
 				
 			}
 			
 			if(i == 2) {
 				IBk ibk2 = new IBk();
-				try {
-					resample.setInputFormat(training);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				resample.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(resample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
 				String[] extra = {noFilter,samplerOverSampling};
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerOverSampling};
-				try {
-					resample.setInputFormat(filteredTraining);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				resample.setInputFormat(filteredTraining);
 				fc.setFilter(resample);
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 		}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
 	public static void underSampling(Instances training, Instances testing, Instances filteredTraining, Instances testingFiltered, String version, String defectiveInTrainingPercent, String defectiveInTestingPercent) throws IOException{
+		try {
 		for(int i = 0; i< 3; i++) {
 			ClassifierEvaluator evaluator = new ClassifierEvaluator(training, testing);
 			if(i == 0) {
 				NaiveBayes nb = new NaiveBayes();
-				try {
-					spreadSubsample.setInputFormat(training);
+				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(nb);
 				fc.setFilter(spreadSubsample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -235,15 +222,10 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
 			}
 			if(i == 1) {
 				RandomForest rf = new RandomForest();
-				try {
-					spreadSubsample.setInputFormat(training);
+				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(rf);
 				fc.setFilter(spreadSubsample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -255,17 +237,11 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
 			}
 			
 			if(i == 2) {
 				IBk ibk2 = new IBk();
-				try {
-					spreadSubsample.setInputFormat(training);
-				
+				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(spreadSubsample);
 				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
@@ -277,10 +253,10 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			}
+		}
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 		
 	
