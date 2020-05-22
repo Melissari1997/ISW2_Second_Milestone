@@ -33,7 +33,13 @@ import weka.classifiers.meta.FilteredClassifier;
 
 
 public class ClassifierEvaluation{
-	public static void evaluation(String projName, String version, int trainingPerc, double defectiveInTraining, double defectiveInTesting, int majorityPerc, List<Object> classifiers, Instances training, Instances testing, CSVWriter csvWriter) throws Exception {
+	private static int trainingPerc = 0;
+	public static CSVWriter csvWriter = null;
+	public static String projName;
+	public static String training = "Training";
+	public static String testing = "Testing";
+	
+	public static void evaluation(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc, List<Object> classifiers, Instances training, Instances testing) throws Exception {
 		
 		String trainingPercent = String.valueOf(trainingPerc);
 		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
@@ -78,13 +84,12 @@ public class ClassifierEvaluation{
 		
 		//No filter & No balancing
 		evalClass.evaluateModel(naiveBayes, testing); 
-		//System.out.println(eval.toSummaryString("Evaluation results for Naive Bayes:\n", false));
 		BigDecimal precision = new BigDecimal(Double.toString(evalClass.precision(1)));
 		precision = precision.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "None", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -140,10 +145,9 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
-		//System.out.println(eval.toSummaryString("Evaluation results for Naive Bayes:\n", false));
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "SMOTE",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
 		
 		//filter & smote
@@ -156,7 +160,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "SMOTE",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -173,7 +177,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -188,7 +192,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "Naive Bayes",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -202,7 +206,6 @@ public class ClassifierEvaluation{
 		
 		//No filter & No balancing
 		evalClass.evaluateModel(randomForest, testing); 
-		//System.out.println(eval.toSummaryString("Evaluation results for Naive Bayes:\n", false));
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "None",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
 		//Filter & No balancing
 		randomForest.buildClassifier(filteredTraining);
@@ -212,7 +215,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "None",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -227,7 +230,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "UnderSampling", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -239,7 +242,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "UnderSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -256,10 +259,9 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
-		//System.out.println(eval.toSummaryString("Evaluation results for Naive Bayes:\n", false));
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "SMOTE",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
 		
 		//filter & smote
@@ -272,7 +274,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "SMOTE", String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -289,7 +291,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"No filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -304,7 +306,7 @@ public class ClassifierEvaluation{
 		recall = new BigDecimal(Double.toString(evalClass.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
 		auc = new BigDecimal(Double.toString(evalClass.areaUnderPRC(1)));
-		auc = precision.setScale(2, RoundingMode.HALF_UP);
+		auc = auc.setScale(2, RoundingMode.HALF_UP);
 		kappa = new BigDecimal(Double.toString(evalClass.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, "RandomForest",trainingPercent,defectiveInTrainingPercent,defectiveInTestingPercent,"Filter", "OverSampling",  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
@@ -319,9 +321,9 @@ public class ClassifierEvaluation{
 	}
 	
 	public static List<Double> computeDefectivePerc(String projName, int trainingRelease) throws IOException {
-		//List<String[]> records = getAllReleases(projName, trainingRelease);
-		List<String[]> trainingReleases = getReleases(projName, trainingRelease, "Training");
-		List<String[]> testingReleases = getReleases(projName, trainingRelease, "Testing");
+		
+		List<String[]> trainingReleases = getReleases(projName, trainingRelease, training);
+		List<String[]> testingReleases = getReleases(projName, trainingRelease, testing);
 		int defectiveInTraining = 0;
 		int defectiveInTesting = 0;
 		for(String[] info: trainingReleases) {
@@ -367,13 +369,13 @@ public class ClassifierEvaluation{
 	}
 	public static int computeTrainingPerc(String projName, int trainingRelease) throws IOException {
 
-	  List<String[]> trainingReleases = getReleases(projName, trainingRelease,"Training");
+	  List<String[]> trainingReleases = getReleases(projName, trainingRelease,training);
 	  List<String[]> records = getAllReleases(projName);
 	  return (int)(((double)trainingReleases.size()/(double)records.size())*100);
 	  
 	}
 	public static int computeMajorityClass(String projName, int trainingRelease) throws IOException {
-		List<String[]> records = getReleases(projName, trainingRelease, "Testing");
+		List<String[]> records = getReleases(projName, trainingRelease, testing);
 		int yes = 0;
 		int no = 0;
 		for(String[] info: records) {
@@ -390,7 +392,7 @@ public class ClassifierEvaluation{
 			return (int)(((double)no/(double)records.size())*100);
 		}
 	}
-	public static void main(String args[]) throws Exception{
+	public static void main(String[] args) throws Exception{
 		//load datasets
 		String projName = "OPENJPA";
 		CSVWriter csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
@@ -417,19 +419,17 @@ public class ClassifierEvaluation{
 			Instances training = source1.getDataSet();
 			DataSource source2 = new DataSource(projName + version + "Test.arff");
 			Instances testing = source2.getDataSet();
-			int trainingPerc = computeTrainingPerc(projName, Integer.valueOf(version));
+			trainingPerc = computeTrainingPerc(projName, Integer.valueOf(version));
 			List<Double> defectivePerc = computeDefectivePerc(projName, Integer.parseInt(version));
 			Double defectiveInTraining =defectivePerc.get(0);
 			Double defectiveInTesting = defectivePerc.get(1);
 			BigDecimal defectiveInTestingFormatted = new BigDecimal(Double.toString(defectiveInTesting));
 			defectiveInTestingFormatted = defectiveInTestingFormatted.setScale(3, RoundingMode.HALF_UP);
+			
 			BigDecimal defectiveInTrainingFormatted = new BigDecimal(Double.toString(defectiveInTraining));
 			defectiveInTrainingFormatted = defectiveInTrainingFormatted.setScale(3, RoundingMode.HALF_UP);
-			//Double defectiveInTestingFormatted = Double.valueOf(String.format("%.2f", defectiveInTesting));
-			//System.out.println(defectiveInTraining);
-			//System.out.println(String.format("%.2f", defectiveInTesting));
 			int majorityPerc = computeMajorityClass(projName, Integer.parseInt(version));
-			evaluation(projName, version,trainingPerc,defectiveInTrainingFormatted.doubleValue(),defectiveInTestingFormatted.doubleValue(), majorityPerc, classifiers, training, testing, csvWriter);
+			evaluation(version,defectiveInTrainingFormatted.doubleValue(),defectiveInTestingFormatted.doubleValue(), majorityPerc, classifiers, training, testing);
 
 		}
 		csvWriter.close();
