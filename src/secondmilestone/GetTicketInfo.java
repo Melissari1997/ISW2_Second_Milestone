@@ -52,10 +52,11 @@ public class GetTicketInfo {
       }
       
       public static boolean checkIv(String fixedVersion, String openingVersion, String injectedVersion) {
-    	  if(fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0) { 
-	           	  return true;  
-    	  }
-    	  return false;
+    	  //if(fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0) { 
+	      //     	  return true;  
+    	  //}
+    	  return (fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0);
+    	  
       }
       public static boolean computeInjectedVersion(JSONObject key, String projName) throws ParseException, JSONException, IOException {
     	   JSONArray affectedVersion = key.getJSONObject(fieldsStr).getJSONArray("versions");
@@ -81,7 +82,7 @@ public class GetTicketInfo {
       		if(affectedVersion.getJSONObject(index).has(releaseDateStr))
       			affectedVersionList.add(new SimpleDateFormat(formatDate).parse(affectedVersion.getJSONObject(index).getString(releaseDateStr)));  
       	   }     	
-      	   if(affectedVersionList.size() != 0) {
+      	   if(affectedVersionList.isEmpty()) {
       		iv = Collections.min(affectedVersionList, (o1,o2) ->  o1.compareTo(o2));	
       		injectedVersion = vp.getVersionName(iv, projName);
       		if(iv.compareTo(new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("created"))) > 0 || openingVersion == null){
@@ -93,10 +94,10 @@ public class GetTicketInfo {
       	   }
 	  	    injectedVersion = proportion(fixedVersion,openingVersion);
 	  	    boolean checkIv = checkIv(fixedVersion, openingVersion,injectedVersion);
-	  	    if(checkIv == false) {
+	  	    if(!checkIv) {
 	  	    	return false;
 	  	    }
-	      	if(affectedVersionList.size() != 0) {
+	      	if(affectedVersionList.isEmpty()) {
 	      		computeP(Integer.valueOf(fixedVersion), Integer.valueOf(openingVersion), Integer.valueOf(injectedVersion));
 	      	}
 	      	key.getJSONObject(fieldsStr).put("injectedversion", injectedVersion); 
@@ -122,8 +123,7 @@ public class GetTicketInfo {
      public static void deleteNonReleasedVersions(JSONArray versions) throws JSONException, ParseException, IOException {
     	 if(versions.length() >0) {
     		 for(int i = 0; i< versions.length();i++) {
-    			 if(versions.getJSONObject(i).has("released") && versions.getJSONObject(i).getBoolean("released") == false) {
-        			 //System.out.println("Removed"+ versions.getJSONObject(i));
+    			 if(!versions.getJSONObject(i).has("released") && versions.getJSONObject(i).getBoolean("released")) {
         			 versions.remove(i);
         			 i--;
     			 }
@@ -137,7 +137,6 @@ public class GetTicketInfo {
 		  Integer i = 0; 
 		  Integer total = 1;
 		  VersionParser vp = new VersionParser();
-		  //vp.setProgress(1.0);
 		  JSONArray ticketList = new JSONArray();
 	     do {
 	         j = i + 1000;
@@ -154,12 +153,12 @@ public class GetTicketInfo {
 	           // System.out.println(key);
 	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
 	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
-	            
+	            String versionName = null;
             	
 	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length() == 0) {
 	            	JSONObject jsonresolutionDate = new JSONObject();
 	            	Date resolutionDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("resolutiondate")); 
-	            	String versionName = vp.getVersionName(resolutionDate, projName);
+	            	versionName = vp.getVersionName(resolutionDate, projName);
 	            	
 	            	if(versionName == null) {
 	            		continue; // non considero date di ticket creati nel periodo di una versione recente non ancora rilasciata
@@ -174,10 +173,9 @@ public class GetTicketInfo {
 	            }
 	            
 	            
-            	if(computeInjectedVersion(key, projName) == false) {
-            		continue;
+            	if(!computeInjectedVersion(key, projName) && versionName != null ) {
+            		ticketList.put(key);
             	}
-	            ticketList.put(key);
 	         } 
 	         }while(i<total);
 	     
