@@ -23,22 +23,6 @@ import com.opencsv.CSVWriter;
 
 public class CreateDataset {
 	
-	public static JSONObject getCommitFromVersionName(String fileName, String Version) throws IOException, JSONException {
-		String token = new String(Files.readAllBytes(Paths.get(fileName)));
-        JSONArray object = new JSONArray(token);
-        int total = object.length();
-        JSONArray commitsOfVersion = new JSONArray();     
-        int i;
-        for (i=0; i < total; i++) {
-        	if( object.getJSONObject(i).getString("Version").equals(Version)) {
-        		
-        		commitsOfVersion.put(object.getJSONObject(i));
-        		return commitsOfVersion.getJSONObject(0);
-        	};
-        }
-             
-		return null;
-	}
 	public static JSONObject getVersionCommit(String projName, String Version) throws IOException, JSONException {
 		
 		CSVReader csvReader = null;

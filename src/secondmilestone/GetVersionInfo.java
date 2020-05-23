@@ -31,22 +31,67 @@ public class GetVersionInfo {
 		   private static ArrayList<LocalDateTime> releases;
 		   static Logger logger = Logger.getLogger(GetVersionInfo.class.getName());
 		   //private static double progress = 0.5; // percentuale di progresso. 0.5 indica il   50% del progresso, ovvero il primo 50% delle versioni
-		   public static JSONObject getCommitFromVersionName(String fileName, String Version) throws IOException, JSONException {
+		   public static JSONObject getCommitFromVersionName(String fileName, String version) throws IOException, JSONException {
 				String token = new String(Files.readAllBytes(Paths.get(fileName)));
 		        JSONArray object = new JSONArray(token);
 		        int total = object.length();
 		        JSONArray commitsOfVersion = new JSONArray();     
 		        int i;
 		        for (i=0; i < total; i++) {
-		        	if( object.getJSONObject(i).getString("Version").equals(Version)) {
+		        	if( object.getJSONObject(i).getString("Version").equals(version)) {
 		        		
 		        		commitsOfVersion.put(object.getJSONObject(i));
 		        		return commitsOfVersion.getJSONObject(0);
-		        	};
+		        	}
 		        }
 		             
 				return null;
 			}
+		   
+		   public static void writeOnFile(String projName, JSONArray releasesCommit ) throws IOException {
+			   CSVWriter csvWriter = null;
+				 try {
+		
+			            //Name of CSV for output
+			            csvWriter = new CSVWriter(new FileWriter(projName + "VersionInfo.csv"),';',
+			                    CSVWriter.NO_QUOTE_CHARACTER,
+			                    CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+			                    CSVWriter.DEFAULT_LINE_END);
+
+			            csvWriter.writeNext(new String[] {"Index","Version ID","Version Name","Date", "VersionSha"});
+			            Integer index = 0;
+			            for ( int i = 0; i < releases.size(); i++) {
+			               String releaseSha = null;
+			               
+			               String versionName = releaseNames.get(releases.get(i));
+			               for(int j = 0; j < releasesCommit.length(); j++) {
+			            	   String releaseName = releasesCommit.getJSONObject(j).getString("name");
+			            	   
+			            	   if(releaseName.equals(versionName) || releaseName.equals("release-"+versionName) || releaseName.equals(versionName+"-incubating")) {
+			            		   releaseSha = releasesCommit.getJSONObject(j).getJSONObject("commit").getString("sha");
+			            	   }
+			               }
+			               if(versionName == null) {
+			            	   JSONObject computedReleaseSha = getCommitFromVersionName(projName + "_Extended_Commits_Sha.JSON", versionName);
+			            	   if(computedReleaseSha != null)
+			            		   releaseSha = computedReleaseSha.getString("sha");
+			               }
+			               if(releaseSha != null) {
+			            	index++;
+			                csvWriter.writeNext(new String[] {index.toString(),releaseID.get(releases.get(i)),releaseNames.get(releases.get(i)),releases.get(i).toString(), releaseSha});
+			               }
+			               
+			            }
+
+			         } catch (Exception e) {
+			          
+			            logger.log(Level.INFO, "context", e);
+			         } 
+				 
+					 if (csvWriter != null) {
+						 csvWriter.close();
+					 }
+		   }
 		   public static void main(String[] args) throws IOException, JSONException {
 			   
 		   String projName ="OPENJPA";
@@ -67,7 +112,6 @@ public class GetVersionInfo {
 	                  name = versions.getJSONObject(i).get("name").toString();
 	               if (versions.getJSONObject(i).has("id"))
 	                  id = versions.getJSONObject(i).get("id").toString();
-	               //if (versions.getJSONObject(i).getBoolean("released") == true)
 	            	   addRelease(versions.getJSONObject(i).get("releaseDate").toString(),
 	                          name,id);
 	            }
@@ -98,50 +142,7 @@ public class GetVersionInfo {
 	             
 	        
 	         }while(total>0);
-	            
-	         CSVWriter csvWriter = null;
-			 try {
-	
-		            //Name of CSV for output
-		            csvWriter = new CSVWriter(new FileWriter(projName + "VersionInfo.csv"),';',
-		                    CSVWriter.NO_QUOTE_CHARACTER,
-		                    CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-		                    CSVWriter.DEFAULT_LINE_END);
-
-		            csvWriter.writeNext(new String[] {"Index","Version ID","Version Name","Date", "VersionSha"});
-		            Integer index = 0;
-		            for ( i = 0; i < releases.size(); i++) {
-		               String releaseSha = null;
-		               
-		               String versionName = releaseNames.get(releases.get(i));
-		               for(int j = 0; j < releasesCommit.length(); j++) {
-		            	   String releaseName = releasesCommit.getJSONObject(j).getString("name");
-		            	   
-		            	   if(releaseName.equals(versionName) || releaseName.equals("release-"+versionName) || releaseName.equals(versionName+"-incubating")) {
-		            		   releaseSha = releasesCommit.getJSONObject(j).getJSONObject("commit").getString("sha");
-		            	   }
-		               }
-		               if(versionName == null) {
-		            	   JSONObject computedReleaseSha = getCommitFromVersionName(projName + "_Extended_Commits_Sha.JSON", versionName);
-		            	   if(computedReleaseSha != null)
-		            		   releaseSha = computedReleaseSha.getString("sha");
-		               }
-		               if(releaseSha != null) {
-		            	index++;
-		                csvWriter.writeNext(new String[] {index.toString(),releaseID.get(releases.get(i)),releaseNames.get(releases.get(i)),releases.get(i).toString(), releaseSha});
-		               }
-		               
-		            }
-
-		         } catch (Exception e) {
-		          
-		            logger.log(Level.INFO, "context", e);
-		         } 
-			 
-				 if (csvWriter != null) {
-					 csvWriter.close();
-				 }
-				 
+	         writeOnFile(projName, releasesCommit);		 
 	       }
 			 
 		         
