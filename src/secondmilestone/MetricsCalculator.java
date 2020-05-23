@@ -119,7 +119,6 @@ public class MetricsCalculator {
 			if(versionID != null)
 				versionsList.add(versionID);	
 		}
-		System.out.println("Affected versions "+ versionsList);
 		List<String> fileList = getBuggyFiles(projName, commitMessage) ;
 		    for (int i = 0; i < fileRecords.size(); i++) {
 		    	if(fileRecords.get(i).length >2 && fileList.contains(fileRecords.get(i)[0])&& versionsList.contains((fileRecords.get(i)[1]))) {
@@ -151,34 +150,9 @@ public class MetricsCalculator {
 	    	}
 	    } 
 	}
-
-	public static List<String[]> findBuggyness(String projName, List<String[]> fileRecords) throws Exception {
-		String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
-        JSONArray object = new JSONArray(token);
-        int total = object.length();
-        System.out.println("Iterazioni per le metriche: " + total);
-        
-        for(int i = 0; i< 71 ; i++) {
-        	System.out.println("Iteration: " + i);
-        	String fixCommit =object.getJSONObject(i).getString(fixCommitStr);
-        	updateNumberOfRevision(object.getJSONObject(i),fileRecords);
-        	updateNumberFix(object.getJSONObject(i),fileRecords);
-        	updateChgSetSize(object.getJSONObject(i),fileRecords);
-        	updateChurn(object.getJSONObject(i),fileRecords);
-        	if(!fixCommit.isEmpty()) {
-        		searchInTicketList(projName, fixCommit, fileRecords);
-        	}
-        }
-        
-        System.out.println(fileRecords.size());
-        for(int i = 0; i < fileRecords.size(); i++) {
-        	if(Integer.valueOf(fileRecords.get(i)[2])>0) {
-        		fileRecords.get(i)[7] = String.valueOf(Integer.valueOf(fileRecords.get(i)[5])/Integer.valueOf(fileRecords.get(i)[2]));
-        		fileRecords.get(i)[10] = String.valueOf(Integer.valueOf(fileRecords.get(i)[8])/Integer.valueOf(fileRecords.get(i)[2]));
-        	}
-        }
-        
-        VersionParser vp = new VersionParser();
+	public static void writeSize(String projName, List<String[]> fileRecords) throws IOException, JSONException {
+		
+		VersionParser vp = new VersionParser();
     	List<String> versionsList = vp.getVersionList(projName);
     	versionsList.remove(versionsList.size()-1);
     	HashMap<String,JSONArray> listTreeSha = new HashMap<>();
@@ -189,9 +163,7 @@ public class MetricsCalculator {
 		for(String version: versionsList) {
         		JSONArray treeSha =listTreeSha.get(version);
         		try {
-        			System.out.println("Numero di iterazioni per " + version + " : " + treeSha.length());
                     for ( int i = 0; i < treeSha.length(); i++) {
-                    	System.out.println("Number: " + i);
                         String type = treeSha.getJSONObject(i).getString("type");
                         if(type.equals("blob") && treeSha.getJSONObject(i).getString("path").contains(".java")) {
                         	computeLoc(projName,version, treeSha.getJSONObject(i).getString("sha"),treeSha.getJSONObject(i).getString("path"), fileRecords);
@@ -200,10 +172,34 @@ public class MetricsCalculator {
           	      }catch(Exception e) {
           		  e.printStackTrace();
           	      }
-        		System.out.println("-----------------------");
         	}
 		
 		
+		
+	}
+
+	public static List<String[]> findBuggyness(String projName, List<String[]> fileRecords) throws Exception {
+		String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
+        JSONArray object = new JSONArray(token);
+        int total = object.length();
+        for(int i = 0; i< total ; i++) {
+        	String fixCommit =object.getJSONObject(i).getString(fixCommitStr);
+        	updateNumberOfRevision(object.getJSONObject(i),fileRecords);
+        	updateNumberFix(object.getJSONObject(i),fileRecords);
+        	updateChgSetSize(object.getJSONObject(i),fileRecords);
+        	updateChurn(object.getJSONObject(i),fileRecords);
+        	if(!fixCommit.isEmpty()) {
+        		searchInTicketList(projName, fixCommit, fileRecords);
+        	}
+        }
+        for(int i = 0; i < fileRecords.size(); i++) {
+        	if(Integer.valueOf(fileRecords.get(i)[2])>0) {
+        		fileRecords.get(i)[7] = String.valueOf(Integer.valueOf(fileRecords.get(i)[5])/Integer.valueOf(fileRecords.get(i)[2]));
+        		fileRecords.get(i)[10] = String.valueOf(Integer.valueOf(fileRecords.get(i)[8])/Integer.valueOf(fileRecords.get(i)[2]));
+        	}
+        }
+        writeSize(projName, fileRecords);
+       
         return fileRecords;
 	}
 

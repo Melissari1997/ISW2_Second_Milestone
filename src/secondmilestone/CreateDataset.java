@@ -76,7 +76,7 @@ public class CreateDataset {
 	}
  
 	public static void main(String[] args) throws Exception {
-  	  String projName = "OPENJPA";
+  	  String projName = "BOOKKEEPER";
   	  String fileName = projName + "VersionInfo.csv";
   	  VersionParser vp = new VersionParser();
   	  List<String> versionsList = vp.getVersionList(projName);
