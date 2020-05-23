@@ -4,6 +4,7 @@ package secondmilestone;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,15 +94,13 @@ public class MetricsCalculator {
 			fileList.add(fileListJson.getJSONObject(j).getString(fileNameStr));	
 		}
         for (int i = 0; i < fileRecords.size(); i++) {
-	    	if(fileRecords.get(i).length >2) {
-		    	if (fileList.contains(fileRecords.get(i)[0]) && !commit.getString(fixCommitStr).isEmpty() && commit.getString(versionStr).equals(fileRecords.get(i)[1])) {
+	    	if(fileRecords.get(i).length >2 && fileList.contains(fileRecords.get(i)[0]) && !commit.getString(fixCommitStr).isEmpty() && commit.getString(versionStr).equals(fileRecords.get(i)[1])) {
 		    		fileRecords.get(i)[3]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[3])+1));	
-		    	}
 	    	}
 	    }  
 	}
 	
-	public static void setBuggy(String projName,JSONArray affectedVersions, String commitMessage, List<String[]> fileRecords) throws Exception {
+	public static void setBuggy(String projName,JSONArray affectedVersions, String commitMessage, List<String[]> fileRecords) throws JSONException, ParseException, IOException  {
 		/*
 		 * Con un altro metodo, costruisco la lista di file che sono presenti in Fix commit
 		 * nel periodo AV = [IV, FV)
@@ -178,7 +177,7 @@ public class MetricsCalculator {
         		fileRecords.get(i)[10] = String.valueOf(Integer.valueOf(fileRecords.get(i)[8])/Integer.valueOf(fileRecords.get(i)[2]));
         	}
         }
-        /*
+        
         VersionParser vp = new VersionParser();
     	List<String> versionsList = vp.getVersionList(projName);
     	versionsList.remove(versionsList.size()-1);
@@ -187,18 +186,14 @@ public class MetricsCalculator {
     		CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv", versionsList.get(k));
     		listTreeSha.put(versionsList.get(k),CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv", versionsList.get(k)));
     	}
-       // System.out.println("Total iteration for LOC: " + fileRecords.size());
 		for(String version: versionsList) {
-        		
         		JSONArray treeSha =listTreeSha.get(version);
-        		//System.out.println(treeSha);
         		try {
         			System.out.println("Numero di iterazioni per " + version + " : " + treeSha.length());
                     for ( int i = 0; i < treeSha.length(); i++) {
                     	System.out.println("Number: " + i);
                         String type = treeSha.getJSONObject(i).getString("type");
                         if(type.equals("blob") && treeSha.getJSONObject(i).getString("path").contains(".java")) {
-                        	//JSONObject infoJson = GithubConnector.readJsonFromUrl(treeSha.getJSONObject(i).getString("url"));
                         	computeLoc(projName,version, treeSha.getJSONObject(i).getString("sha"),treeSha.getJSONObject(i).getString("path"), fileRecords);
                         } 
                      }  
@@ -207,7 +202,7 @@ public class MetricsCalculator {
           	      }
         		System.out.println("-----------------------");
         	}
-		*/
+		
 		
         return fileRecords;
 	}
