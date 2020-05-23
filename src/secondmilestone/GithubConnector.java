@@ -15,6 +15,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class GithubConnector {
+	public GithubConnector() {
+		
+	}
 	  public static String readAll(Reader rd) throws IOException {
 	      StringBuilder sb = new StringBuilder();
 	      int cp;
@@ -23,9 +26,8 @@ public class GithubConnector {
 	      }
 	      return sb.toString();
 	   }
- 
-    public static JSONObject readJsonFromUrl(String stringUrl) throws IOException, JSONException {
-        URL url = new URL(stringUrl);
+	public static InputStreamReader setupConnection(String stringUrl) throws IOException {
+		URL url = new URL(stringUrl);
         HttpsURLConnection uc = null;
         uc = (HttpsURLConnection) url.openConnection();
         uc.setRequestProperty("X-Requested-With", "Curl");
@@ -35,37 +37,26 @@ public class GithubConnector {
         byte[] encodedBytes = Base64.getEncoder().encode(userpass.getBytes());
         String basicAuth = "Basic " + new String(encodedBytes);
         uc.setRequestProperty("Authorization", basicAuth);
-        InputStreamReader inputStreamReader = new InputStreamReader(uc.getInputStream());
+        return new InputStreamReader(uc.getInputStream());
+	}
+    public static JSONObject readJsonFromUrl(String stringUrl) throws IOException, JSONException {
+        
+        InputStreamReader inputStreamReader = setupConnection(stringUrl);
         try 
         (BufferedReader rd = new BufferedReader(inputStreamReader);
         ){
-        JSONObject  jsonObject = new JSONObject(readAll(rd));
-        return jsonObject;
+        return new JSONObject(readAll(rd));
       }  finally {
     	  inputStreamReader.close();
       }
 
     }
     public static JSONArray readJsonArrayFromUrl(String stringUrl) throws IOException, JSONException {
-    	URL url = new URL(stringUrl);
-        HttpsURLConnection uc = null;
-      
-        uc = (HttpsURLConnection) url.openConnection();
-       
-        uc.setRequestProperty("X-Requested-With", "Curl");
-        String username =  "Melissari1997";
-        String token =  GitInfo.getToken(); 
-        String userpass = username + ":" + token;
-        byte[] encodedBytes = Base64.getEncoder().encode(userpass.getBytes());
-        String basicAuth = "Basic " + new String(encodedBytes);
-        uc.setRequestProperty("Authorization", basicAuth);
-
-        InputStreamReader inputStreamReader = new InputStreamReader(uc.getInputStream());
+    	InputStreamReader inputStreamReader = setupConnection(stringUrl);
         try 
         (BufferedReader rd = new BufferedReader(inputStreamReader);
         ){
-        JSONArray  jsonArray = new JSONArray(readAll(rd));
-        return jsonArray;
+        return new JSONArray(readAll(rd));
       } finally {
     	  inputStreamReader.close();
       }

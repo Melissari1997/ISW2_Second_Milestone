@@ -130,7 +130,7 @@ public class MetricsCalculator {
 	/*
 	 * trovo le AV
 	 */
-	public static void searchInTicketList(String projName, String commitMessage, List<String[]> fileRecords) throws Exception {
+	public static void searchInTicketList(String projName, String commitMessage, List<String[]> fileRecords) throws IOException, JSONException, ParseException  {
 		JSONArray ticketsID = GetTicketInfo.getTicketID(projName);
 		for(int i = 0; i< ticketsID.length(); i++) {
 			String ticketID = ticketsID.getJSONObject(i).getString("key");
@@ -141,7 +141,7 @@ public class MetricsCalculator {
 			}
 		}
 	}
-	public static void computeLoc(String projName, String version, String commitSha, String fileName, List<String[]> fileRecords) throws Exception {
+	public static void computeLoc(String projName, String version, String commitSha, String fileName, List<String[]> fileRecords) throws IOException, JSONException  {
 		
 		for (int i = 0; i < fileRecords.size(); i++) {
 	    	if(fileRecords.get(i).length >2 && fileRecords.get(i)[4].equals("0") && fileName.equals(fileRecords.get(i)[0])&& version.equals(fileRecords.get(i)[1])) {

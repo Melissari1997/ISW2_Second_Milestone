@@ -13,6 +13,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JiiraUtils {
+	private JiiraUtils() {
+		
+	}
 	private static String readAll(Reader rd) throws IOException {
 	      StringBuilder sb = new StringBuilder();
 	      int cp;
