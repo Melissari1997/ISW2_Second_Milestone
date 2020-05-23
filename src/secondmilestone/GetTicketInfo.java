@@ -79,7 +79,7 @@ public class GetTicketInfo {
       		if(affectedVersion.getJSONObject(index).has(releaseDateStr))
       			affectedVersionList.add(new SimpleDateFormat(formatDate).parse(affectedVersion.getJSONObject(index).getString(releaseDateStr)));  
       	   }     	
-      	   if(affectedVersionList.isEmpty()) {
+      	   if(!affectedVersionList.isEmpty()) {
       		iv = Collections.min(affectedVersionList, (o1,o2) ->  o1.compareTo(o2));	
       		injectedVersion = vp.getVersionName(iv, projName);
       		if(iv.compareTo(new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("created"))) > 0 || openingVersion == null){
@@ -103,18 +103,19 @@ public class GetTicketInfo {
 	        return true;
       }
       
-      public static void takeOnlyLastFix(JSONArray fixVersions) throws ParseException, JSONException {
+      public static JSONArray takeOnlyLastFix(JSONArray fixVersions) throws ParseException, JSONException {
     	  List<Date> fixVersionsList = new ArrayList<>();
+    	  JSONArray result = new JSONArray();
     	  for(int i = 0; i< fixVersions.length(); i++) {
     		  fixVersionsList.add(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString(releaseDateStr))); 
     	  }
     	  Date fixVersion = Collections.max(fixVersionsList, (o1,o2) ->  o1.compareTo(o2));
     	  for(int i = 0; i< fixVersions.length(); i++) {
-    		  if(fixVersion.compareTo(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString(releaseDateStr))) != 0){
-    			  fixVersions.remove(i);
-    			  i--;
+    		  if(fixVersion.compareTo(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString(releaseDateStr))) == 0){
+    			  return result.put(fixVersions.getJSONObject(i));
     		  }
     	  }
+		return null;
       }
       
      public static void deleteNonReleasedVersions(JSONArray versions) throws JSONException, ParseException, IOException {
@@ -126,6 +127,14 @@ public class GetTicketInfo {
     			 }
         	 }
     	 }
+     }
+     
+     public static void removeOldFixVersion(JSONObject key)throws JSONException, ParseException {
+    	 if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length()>1) {
+         	JSONArray lastFix = takeOnlyLastFix(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
+         	key.getJSONObject(fieldsStr).remove(fixVersionsStr);
+         	key.getJSONObject(fieldsStr).put(fixVersionsStr, lastFix);
+         }
      }
       
 	public static JSONArray getTicketID(String projName) throws IOException, JSONException, ParseException{
@@ -142,11 +151,12 @@ public class GetTicketInfo {
 	         JSONObject json = JiiraUtils.readJsonFromUrl(url);
 	         JSONArray issues = json.getJSONArray("issues");
 	         total = json.getInt("total");
-	         
+	         System.out.println(total);
 	         for (; i < total && i < j; i++) {
 	            //Iterate through each bug
 	        	 
 	            JSONObject key = issues.getJSONObject(i%1000);
+	            
 	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
 	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
 	            String versionName = null;
@@ -163,9 +173,11 @@ public class GetTicketInfo {
 	            	key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).put(jsonresolutionDate);
 	            } 
 	            
-	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length()>1) {
-	            	takeOnlyLastFix(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
-	            }
+	            removeOldFixVersion(key);
+	            System.out.println(i);
+	            //if(computeInjectedVersion(key, projName))
+	            //		continue;
+	            //ticketList.put(key);
 	            putInTicketList(key,versionName, ticketList,projName);
 	         } 
 	         }while(i<total);
@@ -173,12 +185,13 @@ public class GetTicketInfo {
 	      return ticketList;
 	   }
 	public static void putInTicketList(JSONObject key, String versionName, JSONArray ticketList, String projName) throws ParseException, JSONException, IOException {
-		if(!computeInjectedVersion(key, projName) && versionName != null ) {
-    		ticketList.put(key);
+		if(!computeInjectedVersion(key, projName)) {
+			System.out.println("Put");
+			ticketList.put(key);
     	}
 	}
 	public static void main(String[] args) throws IOException, JSONException, ParseException {
-		String projName = "OPENJPA";
+		String projName = "BOOKKEEPER";
 		FileWriter file = new FileWriter(projName +"_TicketInfo.JSON");
 	    JSONArray resultJSONArray = getTicketID(projName);
 	      try {
