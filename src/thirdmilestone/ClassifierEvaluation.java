@@ -258,7 +258,7 @@ public class ClassifierEvaluation{
 			}
 			
 			if(i == 2) {
-				IBk ibk2 = new IBk();;
+				IBk ibk2 = new IBk();
 				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(spreadSubsample);
@@ -286,7 +286,6 @@ public class ClassifierEvaluation{
 	public static void writeOnCsv(String version, String classifierName, String defectiveInTrainingPercent, String defectiveInTestingPercent,String[] extra, Evaluation eval) throws IOException {
 		String filter = extra[0];
 		String balancing = extra[1];
-		System.out.println(eval.precision(1));
 		BigDecimal precision = new BigDecimal(Double.toString(eval.precision(1)));
 		precision = precision.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal recall = new BigDecimal(Double.toString(eval.recall(1)));
@@ -297,10 +296,9 @@ public class ClassifierEvaluation{
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
 		csvWriter.writeNext(new String[] {projName,version, classifierName,String.valueOf(trainingPerc),defectiveInTrainingPercent,defectiveInTestingPercent,filter, balancing,  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
 		csvWriter.flush();
-		System.out.println(version);
 	}
 	
-	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing) throws Exception {
+	public static void evaluation2(String version,double defectiveInTraining, double defectiveInTesting, int majorityPerc,Instances training, Instances testing){
 		String defectiveInTrainingPercent = String.valueOf(defectiveInTraining);
 		String defectiveInTestingPercent = String.valueOf(defectiveInTesting);
 		int numAttr = training.numAttributes();
@@ -335,14 +333,18 @@ public class ClassifierEvaluation{
 			resample.setOptions(overSamplingOpts);
 			spreadSubsample.setOptions(underSamplingOpts);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		fc = new FilteredClassifier();
 		noSampler(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
-		smote(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
-		overSampling(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
-		underSampling(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
+		try {
+			smote(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
+			overSampling(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
+			underSampling(training,testing,filteredTraining,testingFiltered, version, defectiveInTrainingPercent,defectiveInTestingPercent);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	
