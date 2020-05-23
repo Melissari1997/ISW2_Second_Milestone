@@ -88,9 +88,8 @@ public class GetVersionInfo {
 			            logger.log(Level.INFO, "context", e);
 			         } 
 				 
-					 if (csvWriter != null) {
 						 csvWriter.close();
-					 }
+					 
 		   }
 		   public static void main(String[] args) throws IOException, JSONException {
 			   
