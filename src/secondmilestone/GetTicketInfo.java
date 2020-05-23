@@ -18,15 +18,12 @@ public class GetTicketInfo {
 	   private static double totalP =0;
 	   private static int count = 1;
 	   private static String formatDate = "yyyy-MM-dd";
+	   private static String fieldsStr = "fields";
+	   private static String fixVersionsStr = "fixVersions";
+	   private static String releaseDateStr = "releaseDate";
 	   
 	  
-      public static String proportion(String fixedVersion, String openingVersion) throws ParseException, IOException {
-    	  /*
-    	  Date fixedDate = new SimpleDateFormat(formatDate).parse(resolutionDate);
-    	  Date openingDate = new SimpleDateFormat(formatDate).parse(createdDate);
-    	  String fixedVersion = vp.getVersionName(fixedDate, projName);
-    	  String openingVersion = vp.getVersionName(openingDate, projName);
-    	  */
+      public static String proportion(String fixedVersion, String openingVersion){
   	      int injectedVersion =  (int) (Double.valueOf(fixedVersion) -((Double.valueOf(fixedVersion)-Double.valueOf(openingVersion))*p));
   	      
   	      if (injectedVersion <= 0)
@@ -47,25 +44,21 @@ public class GetTicketInfo {
       }
       
       public static void addAffectedVersions(String injectedVersion, String fixedVersion, JSONArray affectedVersion) throws JSONException {
-    	  for(int i = Integer.valueOf(injectedVersion); i < Integer.valueOf(fixedVersion); i++) {
+    	  for(int i = Integer.parseInt(injectedVersion); i < Integer.valueOf(fixedVersion); i++) {
     		  JSONObject affectedV = new JSONObject();
     		  affectedV.put("name", String.valueOf(i));
     		  affectedVersion.put(affectedV);
     	  }
       }
       
-      public static boolean checkIv(String fixedVersion, String openingVersion, String injectedVersion) throws ParseException, IOException {
-    	  //System.out.println("FixVersion: "+ fixedVersion + ";OpeningVersion: "+ openingVersion+"; Injected: " + injectedVersion);
-    	  if(fixedVersion != null && openingVersion!= null && injectedVersion != null) {
-    		 if(Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0){	 
-	           	  return true;
-    		 }
-    		  
+      public static boolean checkIv(String fixedVersion, String openingVersion, String injectedVersion) {
+    	  if(fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0) { 
+	           	  return true;  
     	  }
     	  return false;
       }
       public static boolean computeInjectedVersion(JSONObject key, String projName) throws ParseException, JSONException, IOException {
-    	   JSONArray affectedVersion = key.getJSONObject("fields").getJSONArray("versions");
+    	   JSONArray affectedVersion = key.getJSONObject(fieldsStr).getJSONArray("versions");
     	   Date iv = null;
 		   List<Date> affectedVersionList =  new ArrayList<>(); //lista delle AV trovate quando ho risolto un bug
 		   String injectedVersion = null;
@@ -74,31 +67,30 @@ public class GetTicketInfo {
 	  	   Date fixedDate = null;
 	       String fixedVersion = null;
 	       
-	       if(key.getJSONObject("fields").getJSONArray("fixVersions").getJSONObject(0).has("releaseDate")) {
-	  	     fixedDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject("fields").getJSONArray("fixVersions").getJSONObject(0).getString("releaseDate"));
+	       if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).getJSONObject(0).has(releaseDateStr)) {
+	  	     fixedDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).getJSONObject(0).getString(releaseDateStr));
 	  	     fixedVersion = vp.getVersionName(fixedDate, projName);
 	       }else {
-	      		fixedVersion = (key.getJSONObject("fields").getJSONArray("fixVersions").getJSONObject(0).getString("name"));
+	      		fixedVersion = (key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).getJSONObject(0).getString("name"));
 	      	}
 	        
-	  	   Date openingDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject("fields").getString("created"));
+	  	   Date openingDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("created"));
 	  	   String openingVersion = vp.getVersionName(openingDate, projName);
 		   
       	   for(int index = 0; index< affectedVersion.length();index++) {
-      		if(affectedVersion.getJSONObject(index).has("releaseDate"))
-      			affectedVersionList.add(new SimpleDateFormat("yyyy-MM-dd").parse(affectedVersion.getJSONObject(index).getString("releaseDate")));  
+      		if(affectedVersion.getJSONObject(index).has(releaseDateStr))
+      			affectedVersionList.add(new SimpleDateFormat(formatDate).parse(affectedVersion.getJSONObject(index).getString(releaseDateStr)));  
       	   }     	
       	   if(affectedVersionList.size() != 0) {
       		iv = Collections.min(affectedVersionList, (o1,o2) ->  o1.compareTo(o2));	
       		injectedVersion = vp.getVersionName(iv, projName);
-      		if(iv.compareTo(new SimpleDateFormat(formatDate).parse(key.getJSONObject("fields").getString("created"))) > 0 || openingVersion == null){
+      		if(iv.compareTo(new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("created"))) > 0 || openingVersion == null){
       			return false;
       	    }
       		computeP(Integer.valueOf(fixedVersion), Integer.valueOf(openingVersion), Integer.valueOf(injectedVersion));
-      		key.getJSONObject("fields").put("injectedversion", injectedVersion);
+      		key.getJSONObject(fieldsStr).put("injectedversion", injectedVersion);
       		return true;
       	   }
-  	   // injectedVersion = proportion(key.getJSONObject("fields").getString("resolutiondate"),key.getJSONObject("fields").getString("created"));
 	  	    injectedVersion = proportion(fixedVersion,openingVersion);
 	  	    boolean checkIv = checkIv(fixedVersion, openingVersion,injectedVersion);
 	  	    if(checkIv == false) {
@@ -107,7 +99,7 @@ public class GetTicketInfo {
 	      	if(affectedVersionList.size() != 0) {
 	      		computeP(Integer.valueOf(fixedVersion), Integer.valueOf(openingVersion), Integer.valueOf(injectedVersion));
 	      	}
-	      	key.getJSONObject("fields").put("injectedversion", injectedVersion); 
+	      	key.getJSONObject(fieldsStr).put("injectedversion", injectedVersion); 
 	      	
 	      	addAffectedVersions(injectedVersion,fixedVersion, affectedVersion);
 	        return true;
@@ -116,11 +108,11 @@ public class GetTicketInfo {
       public static void takeOnlyLastFix(JSONArray fixVersions) throws ParseException, JSONException {
     	  List<Date> fixVersionsList = new ArrayList<>();
     	  for(int i = 0; i< fixVersions.length(); i++) {
-    		  fixVersionsList.add(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString("releaseDate"))); 
+    		  fixVersionsList.add(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString(releaseDateStr))); 
     	  }
     	  Date fixVersion = Collections.max(fixVersionsList, (o1,o2) ->  o1.compareTo(o2));
     	  for(int i = 0; i< fixVersions.length(); i++) {
-    		  if(fixVersion.compareTo(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString("releaseDate"))) != 0){
+    		  if(fixVersion.compareTo(new SimpleDateFormat(formatDate).parse(fixVersions.getJSONObject(i).getString(releaseDateStr))) != 0){
     			  fixVersions.remove(i);
     			  i--;
     		  }
@@ -160,13 +152,13 @@ public class GetTicketInfo {
 	        	 
 	            JSONObject key = issues.getJSONObject(i%1000);
 	           // System.out.println(key);
-	            deleteNonReleasedVersions(key.getJSONObject("fields").getJSONArray("fixVersions"));
-	            deleteNonReleasedVersions(key.getJSONObject("fields").getJSONArray("versions"));
+	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
+	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
 	            
             	
-	            if(key.getJSONObject("fields").getJSONArray("fixVersions").length() == 0) {
+	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length() == 0) {
 	            	JSONObject jsonresolutionDate = new JSONObject();
-	            	Date resolutionDate = new SimpleDateFormat("yyyy-MM-dd").parse(key.getJSONObject("fields").getString("resolutiondate")); 
+	            	Date resolutionDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("resolutiondate")); 
 	            	String versionName = vp.getVersionName(resolutionDate, projName);
 	            	
 	            	if(versionName == null) {
@@ -174,21 +166,17 @@ public class GetTicketInfo {
 	            	}
 	            	jsonresolutionDate.put("name", versionName);
 	            		            	//System.out.println(jsonresolutionDate);
-	            	key.getJSONObject("fields").getJSONArray("fixVersions").put(jsonresolutionDate);
+	            	key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).put(jsonresolutionDate);
 	            } 
 	            
-	            if(key.getJSONObject("fields").getJSONArray("fixVersions").length()>1) {
-	            	takeOnlyLastFix(key.getJSONObject("fields").getJSONArray("fixVersions"));
+	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length()>1) {
+	            	takeOnlyLastFix(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
 	            }
 	            
 	            
             	if(computeInjectedVersion(key, projName) == false) {
             		continue;
             	}
-            	//JSONArray affectedVersion = key.getJSONObject("fields").getJSONArray("versions");
-            	
-            	
-            	//key.getJSONObject("fields").put("injectedversion", IV);  
 	            ticketList.put(key);
 	         } 
 	         }while(i<total);
