@@ -122,10 +122,8 @@ public class GetTicketInfo {
     	 JSONArray result = new JSONArray();
     	 if(versions.length() >0) {
     		 for(int i = 0; i< versions.length();i++) {
-    			 if(versions.getJSONObject(i).has("released") && versions.getJSONObject(i).getBoolean("released") == true) {
+    			 if(versions.getJSONObject(i).has("released") && versions.getJSONObject(i).getBoolean("released")) {
         			 result.put(versions.getJSONObject(i));
-    				 //versions.remove(i);
-        			 //i--;
     			 }
         	 }
     	 }
@@ -164,8 +162,8 @@ public class GetTicketInfo {
 	            key.getJSONObject(fieldsStr).remove(fixVersionsStr);
 	            key.getJSONObject(fieldsStr).put(fixVersionsStr, fixedV);
 	            JSONArray fixedAv = deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
-	            key.getJSONObject(fieldsStr).remove(fixVersionsStr);
-	            key.getJSONObject(fieldsStr).put(fixVersionsStr, fixedAv);
+	            key.getJSONObject(fieldsStr).remove("versions");
+	            key.getJSONObject(fieldsStr).put("versions", fixedAv);
 	            String versionName = null;
             	
 	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length() == 0) {
@@ -182,9 +180,6 @@ public class GetTicketInfo {
 	            
 	            removeOldFixVersion(key);
 	            System.out.println(i);
-	            //if(computeInjectedVersion(key, projName))
-	            //		continue;
-	            //ticketList.put(key);
 	            putInTicketList(key,versionName, ticketList,projName);
 	         } 
 	         }while(i<total);
