@@ -118,15 +118,18 @@ public class GetTicketInfo {
 		return null;
       }
       
-     public static void deleteNonReleasedVersions(JSONArray versions) throws JSONException, ParseException, IOException {
+     public static JSONArray deleteNonReleasedVersions(JSONArray versions) throws JSONException, ParseException, IOException {
+    	 JSONArray result = new JSONArray();
     	 if(versions.length() >0) {
     		 for(int i = 0; i< versions.length();i++) {
-    			 if(!versions.getJSONObject(i).has("released") && versions.getJSONObject(i).getBoolean("released")) {
-        			 versions.remove(i);
-        			 i--;
+    			 if(versions.getJSONObject(i).has("released") && versions.getJSONObject(i).getBoolean("released") == true) {
+        			 result.put(versions.getJSONObject(i));
+    				 //versions.remove(i);
+        			 //i--;
     			 }
         	 }
     	 }
+    	 return result;
      }
      
      public static void removeOldFixVersion(JSONObject key)throws JSONException, ParseException {
@@ -157,8 +160,12 @@ public class GetTicketInfo {
 	        	 
 	            JSONObject key = issues.getJSONObject(i%1000);
 	            
-	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
-	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
+	            JSONArray fixedV = deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
+	            key.getJSONObject(fieldsStr).remove(fixVersionsStr);
+	            key.getJSONObject(fieldsStr).put(fixVersionsStr, fixedV);
+	            JSONArray fixedAv = deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
+	            key.getJSONObject(fieldsStr).remove(fixVersionsStr);
+	            key.getJSONObject(fieldsStr).put(fixVersionsStr, fixedAv);
 	            String versionName = null;
             	
 	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length() == 0) {
