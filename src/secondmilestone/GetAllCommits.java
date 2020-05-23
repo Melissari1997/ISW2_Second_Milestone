@@ -21,7 +21,7 @@ public class GetAllCommits {
 	private Date endDate = null;
 	private static String formateDate = "yyyy-MM-dd";
 	private static String commitStr = "commit";
-	private static String fileNameExtention = "_Commits_Sha.JSON";
+	private static String fileNameExtension = "_Commits_Sha.JSON";
 	
 	public GetAllCommits(String startDate, String endDate) throws ParseException {
 		this.startDate = new SimpleDateFormat(formateDate).parse(startDate);
@@ -106,10 +106,10 @@ public class GetAllCommits {
     	  FileWriter file = null;
     	  Logger logger = Logger.getLogger(GetAllCommits.class.getName()); 
     	  GetAllCommits getCommits = new GetAllCommits(startDate,endDate);
-    	  File tmpDir = new File(projName +fileNameExtention);
+    	  File tmpDir = new File(projName +fileNameExtension);
     	  if ( !tmpDir.exists()) {
         	  JSONArray commitsJsonArray = getCommits.getAllCommits(projName, organization);
-        	  file = new FileWriter(projName +fileNameExtention);
+        	  file = new FileWriter(projName +fileNameExtension);
     	      
     	      try {
     	    		  file.write(commitsJsonArray.toString());
@@ -121,7 +121,7 @@ public class GetAllCommits {
     	      }
     	    	
     	  }
-    	  JSONArray extendedCommitsJsonArray = getCommits.getExtendedCommits(projName, projName +fileNameExtention);
+    	  JSONArray extendedCommitsJsonArray = getCommits.getExtendedCommits(projName, projName +fileNameExtension);
     	  file = new FileWriter(projName +"_Extended_Commits_Sha.JSON");
 	      
 	      try {

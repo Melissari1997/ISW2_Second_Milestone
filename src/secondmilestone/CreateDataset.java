@@ -11,9 +11,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import secondmilestone.VersionParser;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,8 +19,8 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 public class CreateDataset {
-	
-	public static JSONObject getVersionCommit(String projName, String Version) throws IOException, JSONException {
+	public static String fileNameExtension = "Dataset.csv";
+	public static JSONObject getVersionCommit(String projName, String version) throws IOException, JSONException {
 		
 		CSVReader csvReader = null;
 		JSONObject result = new JSONObject();
@@ -35,7 +32,7 @@ public class CreateDataset {
 		
 		    List<String[]>  records = csvReader.readAll();
 		    for (int i = 0; i < records.size(); i++) {
-	    		if(records.get(i)[0].equals(Version)) {
+	    		if(records.get(i)[0].equals(version)) {
 		    		 result = GithubConnector.readJsonFromUrl("https://api.github.com/repos/apache/"+ projName+"/commits/" + records.get(i)[4]);
 		    		
 		    		 return result;
@@ -51,12 +48,41 @@ public class CreateDataset {
 		}
 		return null;		
 	}
-	public static JSONArray getTreeSha(String projName, String fileName, String Version) throws IOException, JSONException {
-		JSONObject versionCommit = getVersionCommit(projName,Version);
+	public static JSONArray getTreeSha(String projName,String version) throws IOException, JSONException {
+		JSONObject versionCommit = getVersionCommit(projName,version);
 		if(versionCommit == null)
 			return null;
 		JSONObject treeSha = GithubConnector.readJsonFromUrl(versionCommit.getJSONObject("commit").getJSONObject("tree").getString("url")+"?recursive=1");
 		return treeSha.getJSONArray("tree");
+	}
+	
+	public static void createBaseFile(String projName, List<String> versionsList,String fileName ) throws IOException, JSONException {
+		CSVWriter csvWriter =  new CSVWriter(new FileWriter(projName + fileNameExtension),';',
+	            CSVWriter.NO_QUOTE_CHARACTER,
+	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+	            CSVWriter.DEFAULT_LINE_END);
+
+	     csvWriter.writeNext( new String[] {"FileName","Version Name","#Revision","#FixCommit","Size","Churn", "MaxChurn","AvgChurn","ChgSetSize","MaxChgSetSize","AvgChgSetSize","Buggy"});
+	  	  for( String version :versionsList) {
+	  	  	  JSONArray treeSha = getTreeSha(projName, fileName);
+	  	  	  if(treeSha == null) {
+	  	  		  continue;
+	  	  	  }
+	  	  	  try {
+	            for ( int i = 0; i < treeSha.length(); i++) {
+	                String type = treeSha.getJSONObject(i).getString("type");
+	                if(type.equals("blob") && treeSha.getJSONObject(i).getString("path").contains(".java")) {
+	                	csvWriter.writeNext(new String[] {treeSha.getJSONObject(i).getString("path"),version,"0","0","0","0","0","0","0","0","0", "no"});
+	                	csvWriter.flush();
+	                } 
+	             }  
+	  	      }catch(Exception e) {
+	  		  e.printStackTrace();
+	  	      }
+		 }
+	  	if (csvWriter != null) {
+			 csvWriter.close();
+		 }
 	}
  
 	public static void main(String[] args) throws Exception {
@@ -65,48 +91,21 @@ public class CreateDataset {
   	  VersionParser vp = new VersionParser();
   	  List<String> versionsList = vp.getVersionList(projName);
   	  versionsList.remove(versionsList.size()-1);
-  	  File tmpDir = new File(projName +"Dataset.csv");
+  	  File tmpDir = new File(projName +fileNameExtension);
 	  if ( !tmpDir.exists()) {
-  	  CSVWriter csvWriter =  new CSVWriter(new FileWriter(projName + "Dataset.csv"),';',
-            CSVWriter.NO_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            CSVWriter.DEFAULT_LINE_END);
-
-     csvWriter.writeNext( new String[] {"FileName","Version Name","#Revision","#FixCommit","Size","Churn", "MaxChurn","AvgChurn","ChgSetSize","MaxChgSetSize","AvgChgSetSize","Buggy"});
-  	  for( String version :versionsList) {
-  	  	  JSONArray treeSha = getTreeSha(projName, fileName, version);
-  	  	  if(treeSha == null) {
-  	  		  //versionsList.remove(version);
-  	  		  continue;
-  	  	  }
-  	  	  try {
-            for ( int i = 0; i < treeSha.length(); i++) {
-                String type = treeSha.getJSONObject(i).getString("type");
-                if(type.equals("blob") && treeSha.getJSONObject(i).getString("path").contains(".java")) {
-                	//boolean buggyness = findBug.findBuggyness(treeSha.getJSONObject(i).getString("path"), projName, version,ticketInfoJson);
-                	csvWriter.writeNext(new String[] {treeSha.getJSONObject(i).getString("path"),version,"0","0","0","0","0","0","0","0","0", "no"});
-                	csvWriter.flush();
-                } 
-             }  
-  	      }catch(Exception e) {
-  		  e.printStackTrace();
-  	      }
-	 }
-  	if (csvWriter != null) {
-		 csvWriter.close();
-	 }
+		  createBaseFile(projName,versionsList,fileName);
 	  }
   	  /*
   	   * Leggo tutto il extended commit e mi fermo ogni volta che ho una fix commit.
   	   * Vedo quali erano i file commitati, e per loro vedo se son
   	   */
-  	  Reader reader = Files.newBufferedReader(Paths.get(projName + "Dataset.csv"));
+  	  Reader reader = Files.newBufferedReader(Paths.get(projName + fileNameExtension));
 	  CSVReader csvReader = new CSVReader(reader,';',
     		',', '\'',1);
 	  List<String[]> records = csvReader.readAll();
 	  csvReader.close();
   	  List<String[]>result = MetricsCalculator.findBuggyness(projName, records);
-	  CSVWriter csvAddMetrics =  new CSVWriter(new FileWriter(projName + "Dataset.csv"),';',
+	  CSVWriter csvAddMetrics =  new CSVWriter(new FileWriter(projName + fileNameExtension),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
 	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 	            CSVWriter.DEFAULT_LINE_END);
@@ -115,11 +114,6 @@ public class CreateDataset {
 	  csvAddMetrics.writeAll(result);
 	  csvAddMetrics.flush();
 	  csvAddMetrics.close();
-  	  /*
- 	 if (csvWriter != null) {
- 		 csvWriter.close();
- 	 }*/
-
 
    }
 	
