@@ -52,9 +52,6 @@ public class GetTicketInfo {
       }
       
       public static boolean checkIv(String fixedVersion, String openingVersion, String injectedVersion) {
-    	  //if(fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0) { 
-	      //     	  return true;  
-    	  //}
     	  return (fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0);
     	  
       }
@@ -150,7 +147,6 @@ public class GetTicketInfo {
 	            //Iterate through each bug
 	        	 
 	            JSONObject key = issues.getJSONObject(i%1000);
-	           // System.out.println(key);
 	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
 	            deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
 	            String versionName = null;
@@ -164,23 +160,23 @@ public class GetTicketInfo {
 	            		continue; // non considero date di ticket creati nel periodo di una versione recente non ancora rilasciata
 	            	}
 	            	jsonresolutionDate.put("name", versionName);
-	            		            	//System.out.println(jsonresolutionDate);
 	            	key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).put(jsonresolutionDate);
 	            } 
 	            
 	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length()>1) {
 	            	takeOnlyLastFix(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
 	            }
-	            
-	            
-            	if(!computeInjectedVersion(key, projName) && versionName != null ) {
-            		ticketList.put(key);
-            	}
+	            putInTicketList(key,versionName, ticketList,projName);
 	         } 
 	         }while(i<total);
 	     
 	      return ticketList;
 	   }
+	public static void putInTicketList(JSONObject key, String versionName, JSONArray ticketList, String projName) throws ParseException, JSONException, IOException {
+		if(!computeInjectedVersion(key, projName) && versionName != null ) {
+    		ticketList.put(key);
+    	}
+	}
 	public static void main(String[] args) throws IOException, JSONException, ParseException {
 		String projName = "OPENJPA";
 		FileWriter file = new FileWriter(projName +"_TicketInfo.JSON");
