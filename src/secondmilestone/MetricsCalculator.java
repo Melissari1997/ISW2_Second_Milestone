@@ -157,8 +157,8 @@ public class MetricsCalculator {
     	versionsList.remove(versionsList.size()-1);
     	HashMap<String,JSONArray> listTreeSha = new HashMap<>();
     	for(int k = 0; k < versionsList.size(); k ++) {
-    		CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv", versionsList.get(k));
-    		listTreeSha.put(versionsList.get(k),CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv", versionsList.get(k)));
+    		CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv");
+    		listTreeSha.put(versionsList.get(k),CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv"));
     	}
 		for(String version: versionsList) {
         		JSONArray treeSha =listTreeSha.get(version);

@@ -19,7 +19,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 public class CreateDataset {
-	public static String fileNameExtension = "Dataset.csv";
+	private static final String fileNameExtension = "Dataset.csv";
 	public static JSONObject getVersionCommit(String projName, String version) throws IOException, JSONException {
 		
 		CSVReader csvReader = null;
