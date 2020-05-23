@@ -15,8 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class GithubConnector {
-	public GithubConnector() {
-		
+	private GithubConnector() {
 	}
 	  public static String readAll(Reader rd) throws IOException {
 	      StringBuilder sb = new StringBuilder();

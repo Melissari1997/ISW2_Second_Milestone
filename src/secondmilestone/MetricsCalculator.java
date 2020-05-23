@@ -178,7 +178,7 @@ public class MetricsCalculator {
 		
 	}
 
-	public static List<String[]> findBuggyness(String projName, List<String[]> fileRecords) throws Exception {
+	public static List<String[]> findBuggyness(String projName, List<String[]> fileRecords) throws JSONException, IOException, ParseException  {
 		String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
         JSONArray object = new JSONArray(token);
         int total = object.length();
