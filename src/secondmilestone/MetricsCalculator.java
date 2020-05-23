@@ -14,42 +14,45 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MetricsCalculator {
-	//private static List<String[]> fileRecords;
+	private static String filesStr = "files";
+	private static String fileNameStr ="filename";
+	private static String versionStr = "Version";
+	private static String fixCommitStr = "FixCommit";
+	
+	private MetricsCalculator() {
+		
+	}
 	public static void updateChurn(JSONObject commit, List<String[]> fileRecords) throws JSONException {
 		HashMap<String,Integer> hashChurn = new HashMap<>(); 	
-    	JSONArray fileListJson = commit.getJSONArray("files");
+    	JSONArray fileListJson = commit.getJSONArray(filesStr);
 		for(int j = 0; j<fileListJson.length(); j ++) {
 			int additions = fileListJson.getJSONObject(j).getInt("additions");
 			int deletions = fileListJson.getJSONObject(j).getInt("deletions");
 			int churn = additions-deletions;
-			hashChurn.put(fileListJson.getJSONObject(j).getString("filename"), churn);
+			hashChurn.put(fileListJson.getJSONObject(j).getString(fileNameStr), churn);
 		}		
         for (int i = 0; i < fileRecords.size(); i++) {
-	    	if(fileRecords.get(i).length >2) {
-		    	if (hashChurn.containsKey(fileRecords.get(i)[0]) && commit.getString("Version").equals(fileRecords.get(i)[1])) {
-		    		fileRecords.get(i)[5]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[5])+hashChurn.get(fileRecords.get(i)[0])));
-		    		if(Integer.valueOf(fileRecords.get(i)[6])<hashChurn.get(fileRecords.get(i)[0])) {
-		    			fileRecords.get(i)[6] = String.valueOf(hashChurn.get(fileRecords.get(i)[0]));
-		    		}
-		    	}
+	    	if(fileRecords.get(i).length >2 && hashChurn.containsKey(fileRecords.get(i)[0]) && commit.getString(versionStr).equals(fileRecords.get(i)[1])) {
+	    		fileRecords.get(i)[5]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[5])+hashChurn.get(fileRecords.get(i)[0])));
+	    		if(Integer.valueOf(fileRecords.get(i)[6])<hashChurn.get(fileRecords.get(i)[0])) {
+	    			fileRecords.get(i)[6] = String.valueOf(hashChurn.get(fileRecords.get(i)[0]));
+	    		}	
 	    	}
 	    } 
         
 	}
 	public static void updateChgSetSize(JSONObject commit, List<String[]> fileRecords) throws JSONException {
 		List<String> fileList = new ArrayList<>();
-		JSONArray fileListJson = commit.getJSONArray("files");
+		JSONArray fileListJson = commit.getJSONArray(filesStr);
     	for(int j = 0; j<fileListJson.length(); j ++) {
-    		fileList.add(fileListJson.getJSONObject(j).getString("filename"));	
+    		fileList.add(fileListJson.getJSONObject(j).getString(fileNameStr));	
     	}
     	for (int i = 0; i < fileRecords.size(); i++) {
-	    	if(fileRecords.get(i).length >2) {
-		    	if (fileList.contains(fileRecords.get(i)[0]) && commit.getString("Version").equals(fileRecords.get(i)[1])) {
-		    		fileRecords.get(i)[8]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[8])+fileListJson.length()));	
-		    		if(Integer.valueOf(fileRecords.get(i)[9])<fileListJson.length()) {
-		    			fileRecords.get(i)[9] = String.valueOf(fileListJson.length());
-		    		}
-		    	}
+	    	if(fileRecords.get(i).length >2 &&fileList.contains(fileRecords.get(i)[0]) && commit.getString(versionStr).equals(fileRecords.get(i)[1])) {
+	    		fileRecords.get(i)[8]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[8])+fileListJson.length()));	
+	    		if(Integer.valueOf(fileRecords.get(i)[9])<fileListJson.length()) {
+	    			fileRecords.get(i)[9] = String.valueOf(fileListJson.length());
+	    		}
 	    	}
 	    }  
         		
@@ -60,10 +63,10 @@ public class MetricsCalculator {
 		String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
         JSONArray object = new JSONArray(token);
         for(int i = 0; i< object.length(); i++) {
-        	if(object.getJSONObject(i).getString("FixCommit").equalsIgnoreCase(commitMessage) ) {
-        		JSONArray fileListJson = object.getJSONObject(i).getJSONArray("files");
+        	if(object.getJSONObject(i).getString(fixCommitStr).equalsIgnoreCase(commitMessage) ) {
+        		JSONArray fileListJson = object.getJSONObject(i).getJSONArray(filesStr);
         		for(int j = 0; j<fileListJson.length(); j ++) {
-        			fileList.add(fileListJson.getJSONObject(j).getString("filename"));	
+        			fileList.add(fileListJson.getJSONObject(j).getString(fileNameStr));	
         		}
         	}	
         }
@@ -72,28 +75,26 @@ public class MetricsCalculator {
 	}
 	public static void updateNumberOfRevision(JSONObject commit, List<String[]> fileRecords) throws IOException, JSONException {
 		List<String> fileList = new ArrayList<>();
-    	JSONArray fileListJson = commit.getJSONArray("files");
+    	JSONArray fileListJson = commit.getJSONArray(filesStr);
 		for(int j = 0; j<fileListJson.length(); j ++) {
-			fileList.add(fileListJson.getJSONObject(j).getString("filename"));	
+			fileList.add(fileListJson.getJSONObject(j).getString(fileNameStr));	
 		}
         for (int i = 0; i < fileRecords.size(); i++) {
-	    	if(fileRecords.get(i).length >2) {
-		    	if (fileList.contains(fileRecords.get(i)[0]) && commit.getString("Version").equals(fileRecords.get(i)[1])) {
+	    	if(fileRecords.get(i).length >2 && fileList.contains(fileRecords.get(i)[0]) && commit.getString(versionStr).equals(fileRecords.get(i)[1])) {
 		    		fileRecords.get(i)[2]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[2])+1));	
-		    	}
 	    	}
 	    }    
 	}
 	
 	public static void updateNumberFix(JSONObject commit, List<String[]> fileRecords) throws JSONException {
 		List<String> fileList = new ArrayList<>();  	
-    	JSONArray fileListJson = commit.getJSONArray("files");
+    	JSONArray fileListJson = commit.getJSONArray(filesStr);
 		for(int j = 0; j<fileListJson.length(); j ++) {
-			fileList.add(fileListJson.getJSONObject(j).getString("filename"));	
+			fileList.add(fileListJson.getJSONObject(j).getString(fileNameStr));	
 		}
         for (int i = 0; i < fileRecords.size(); i++) {
 	    	if(fileRecords.get(i).length >2) {
-		    	if (fileList.contains(fileRecords.get(i)[0]) && !commit.getString("FixCommit").isEmpty() && commit.getString("Version").equals(fileRecords.get(i)[1])) {
+		    	if (fileList.contains(fileRecords.get(i)[0]) && !commit.getString(fixCommitStr).isEmpty() && commit.getString(versionStr).equals(fileRecords.get(i)[1])) {
 		    		fileRecords.get(i)[3]=  String.valueOf((Integer.valueOf(fileRecords.get(i)[3])+1));	
 		    	}
 	    	}
@@ -122,10 +123,8 @@ public class MetricsCalculator {
 		System.out.println("Affected versions "+ versionsList);
 		List<String> fileList = getBuggyFiles(projName, commitMessage) ;
 		    for (int i = 0; i < fileRecords.size(); i++) {
-		    	if(fileRecords.get(i).length >2) {
-			    	if (fileList.contains(fileRecords.get(i)[0])&& versionsList.contains((fileRecords.get(i)[1]))) {
+		    	if(fileRecords.get(i).length >2 && fileList.contains(fileRecords.get(i)[0])&& versionsList.contains((fileRecords.get(i)[1]))) {
 			    			fileRecords.get(i)[11]=  "yes";	
-			    	}
 		    	}
 		    } 
 	}
@@ -147,13 +146,9 @@ public class MetricsCalculator {
 	public static void computeLoc(String projName, String version, String commitSha, String fileName, List<String[]> fileRecords) throws Exception {
 		
 		for (int i = 0; i < fileRecords.size(); i++) {
-	    	if(fileRecords.get(i).length >2) {
-		    	if (fileRecords.get(i)[4].equals("0") && fileName.equals((fileRecords.get(i)[0]))&& version.equals(((fileRecords.get(i)[1])))) {
+	    	if(fileRecords.get(i).length >2 && fileRecords.get(i)[4].equals("0") && fileName.equals(fileRecords.get(i)[0])&& version.equals(fileRecords.get(i)[1])) {
 		    		int loc = SizeCalculator.getSize(projName, commitSha);	
 		    		fileRecords.get(i)[4]=  String.valueOf(loc);
-		    			//System.out.println("LOC for: " + fileRecords.get(i)[0] + " =" + loc );
-		    			
-		    	}
 	    	}
 	    } 
 	}
@@ -166,7 +161,7 @@ public class MetricsCalculator {
         
         for(int i = 0; i< 71 ; i++) {
         	System.out.println("Iteration: " + i);
-        	String fixCommit =object.getJSONObject(i).getString("FixCommit");
+        	String fixCommit =object.getJSONObject(i).getString(fixCommitStr);
         	updateNumberOfRevision(object.getJSONObject(i),fileRecords);
         	updateNumberFix(object.getJSONObject(i),fileRecords);
         	updateChgSetSize(object.getJSONObject(i),fileRecords);
