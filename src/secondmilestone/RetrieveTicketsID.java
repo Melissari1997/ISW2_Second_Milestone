@@ -1,26 +1,24 @@
 package secondmilestone;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.net.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
-
+import secondmilestone.JiiraUtils;
 public class RetrieveTicketsID {
 
 	static String projName ="Mahout";
 	static String organization = "apache";
 	static int threshold = 7;
+	private RetrieveTicketsID() {
+		
+	}
+	/*
 	private static String readAll(Reader rd) throws IOException {
 		      StringBuilder sb = new StringBuilder();
 		      int cp;
@@ -52,7 +50,7 @@ public class RetrieveTicketsID {
        }
    }
    
-   
+   */
    public static List<String> getTicketID(String projName) throws IOException, JSONException{
 	 
 	   Integer j = 0;
@@ -67,7 +65,7 @@ public class RetrieveTicketsID {
                 + projName + "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
                 + "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created&startAt="
                 + i.toString() + "&maxResults=" + j.toString();
-         JSONObject json = readJsonFromUrl(url);
+         JSONObject json = JiiraUtils.readJsonFromUrl(url);
          JSONArray issues = json.getJSONArray("issues");
          total = json.getInt("total");
          for (; i < total && i < j; i++) {

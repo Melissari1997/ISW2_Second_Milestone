@@ -1,7 +1,6 @@
 package secondmilestone;
 
 
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,24 +52,9 @@ public class VersionParser {
 		return result;
 	}
 	
-	public List<String> getVersionList(String projName) throws IOException{
+	public List<String> getVersionList(String projName){
 		List<String>  result =  new ArrayList<>();
 		List<String[]>  records = getRecords(projName, this.progress);
-		/*
-		try {
-			Reader reader = Files.newBufferedReader(Paths.get(projName + "VersionInfo.csv"));
-			csvReader = new CSVReader(reader,';',
-		    		',', '\'',1);
-		
-		    List<String[]>  records = csvReader.readAll();
-		    int start = ((int) (records.size()*this.progress));
-		    if(this.progress!= 1.0)
-		    	start++;
-		    for(int j = start; j< records.size();j++) {
-		    	records.remove(j);
-		    	j--;
-		    }
-		    */
 		    for (int i = 0; i < records.size(); i++) {
 		    	result.add(records.get(i)[0]);         
 		    }       
@@ -82,7 +66,7 @@ public class VersionParser {
 	 * Prende la data di un commit ed un progetto, e ritorna a quale versione di quel progetto appartiene la commit
 	 * 
 	 */
-	public String getVersionName(Date commitDate, String projName) throws IOException, ParseException {
+	public String getVersionName(Date commitDate, String projName) throws ParseException {
 		String  result =null;
 		List<String[]>  records = getRecords(projName, this.progress);
 	    for (int i = 0; i < records.size()-1; i++) {
@@ -99,12 +83,5 @@ public class VersionParser {
         	}
 	    }       
 		return result;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		VersionParser vp = new VersionParser();
-		//vp.setProgress(1.0);
-		System.out.println(vp.getVersionList("OPENJPA"));
-		
 	}
 }

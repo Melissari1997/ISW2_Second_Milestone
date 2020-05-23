@@ -1,14 +1,8 @@
 package secondmilestone;
 
 
-import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,36 +19,7 @@ public class GetTicketInfo {
 	   private static int count = 1;
 	   private static String formatDate = "yyyy-MM-dd";
 	   
-	   private static String readAll(Reader rd) throws IOException {
-		      StringBuilder sb = new StringBuilder();
-		      int cp;
-		      while ((cp = rd.read()) != -1) {
-		         sb.append((char) cp);
-		      }
-		      return sb.toString();
-		   }
-
-	   public static JSONArray readJsonArrayFromUrl(String url) throws IOException, JSONException {
-		   InputStream is = new URL(url).openStream();
-		      try 
-		         (BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-		         ){
-		         return new JSONArray(readAll(rd));
-		       } finally {
-		         is.close();
-		       }
-		   }
-
-      public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
-		   InputStream is = new URL(url).openStream();
-		   try 
-		      (BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-		      ){
-		      return new JSONObject(readAll(rd));
-		    } finally {
-		      is.close();
-		    }
-		}
+	  
       public static String proportion(String fixedVersion, String openingVersion) throws ParseException, IOException {
     	  /*
     	  Date fixedDate = new SimpleDateFormat(formatDate).parse(resolutionDate);
@@ -186,7 +151,7 @@ public class GetTicketInfo {
 	         j = i + 1000;
 	         String url = "https://issues.apache.org/jira/rest/api/2/search?jql=project%20%3D%20"+projName+"%20AND%20issuetype%20%3D%20Bug%20AND%20status%20in%20(Resolved,%20Closed)%20AND%20resolution%20=%20Fixed%20&&fields=resolutiondate,fixVersions,versions,created&startAt="+ 
 		         		i.toString() + "&maxResults=" + j.toString();
-	         JSONObject json = readJsonFromUrl(url);
+	         JSONObject json = JiiraUtils.readJsonFromUrl(url);
 	         JSONArray issues = json.getJSONArray("issues");
 	         total = json.getInt("total");
 	         

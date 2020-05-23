@@ -82,7 +82,7 @@ public class GetAllCommits {
         int total = 0;
         do {
         	
-        	String res = RetrieveTicketsID.readJsonArrayFromUrl("https://api.github.com/repos/" + organization + "/"+ projName +"/commits?page="+ page.toString()+"&per_page=" + perPage.toString()).toString();
+        	String res = JiiraUtils.readJsonArrayFromUrl("https://api.github.com/repos/" + organization + "/"+ projName +"/commits?page="+ page.toString()+"&per_page=" + perPage.toString()).toString();
         	JSONArray jsonArray = new JSONArray(res);
         	
         	
