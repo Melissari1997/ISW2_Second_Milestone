@@ -179,13 +179,13 @@ public class GetTicketInfo {
 	            } 
 	            
 	            removeOldFixVersion(key);
-	            putInTicketList(key,versionName, ticketList,projName);
+	            putInTicketList(key,ticketList,projName);
 	         } 
 	         }while(i<total);
 	     
 	      return ticketList;
 	   }
-	public static void putInTicketList(JSONObject key, String versionName, JSONArray ticketList, String projName) throws ParseException, JSONException, IOException {
+	public static void putInTicketList(JSONObject key,JSONArray ticketList, String projName) throws ParseException, JSONException, IOException {
 		if(!computeInjectedVersion(key, projName)) {
 			ticketList.put(key);
     	}
