@@ -58,15 +58,12 @@ public class ClassifierEvaluation{
 			if(i == 0) {
 				NaiveBayes nb = new NaiveBayes();
 				evaluator.setTestingTraining(training, testing);
-				//Evaluation evalResult = evaluator.evaluateNaiveBayes(nb);
 				Evaluation evalResult =new Evaluation(testing);
 				nb.buildClassifier(training);
 				evalResult.evaluateModel(nb, testing);
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,noSampler};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				//evalResult = evaluator.evaluateNaiveBayes(nb);
 				nb.buildClassifier(filteredTraining);
 				evalResult.evaluateModel(nb, testingFiltered);
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
@@ -75,15 +72,12 @@ public class ClassifierEvaluation{
 				
 				evaluator.setTestingTraining(testing, training);
 				RandomForest rf = new RandomForest();
-				//Evaluation evalResult = evaluator.evaluateRandomForest(rf);
 				Evaluation evalResult =new Evaluation(testing);
 				rf.buildClassifier(training);
 				evalResult.evaluateModel(rf, testing); 
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,noSampler};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				//evalResult = evaluator.evaluateRandomForest(rf);
 				rf.buildClassifier(filteredTraining);
 				evalResult.evaluateModel(rf, testingFiltered);
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
@@ -91,15 +85,12 @@ public class ClassifierEvaluation{
 			if(i == 2) {
 				IBk ibk2 = new IBk();
 				evaluator.setTestingTraining(testing, training);
-				//Evaluation evalResult = evaluator.evaluateIBk(ibk2);
 				Evaluation evalResult =new Evaluation(testing);
 				ibk2.buildClassifier(training);
 				evalResult.evaluateModel(ibk2, testing); 
 				String[] extra = {noFilter,noSampler};
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,noSampler};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				//evalResult = evaluator.evaluateIBk(ibk2);	
 				ibk2.buildClassifier(filteredTraining);
 				evalResult.evaluateModel(ibk2, testingFiltered);
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
@@ -115,17 +106,14 @@ public class ClassifierEvaluation{
 				NaiveBayes nb = new NaiveBayes();
 				fc.setClassifier(nb);
 				fc.setFilter(smote);
-				//Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
 				Evaluation evalResult =new Evaluation(testing);
 				fc.buildClassifier(training);
 				evalResult.evaluateModel(fc, testing);
 				String[] extra = {noFilter,samplerSmote};
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerSmote};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				smote.setInputFormat(filteredTraining);
 				fc.setFilter(smote);
-				//evalResult = evaluator.evaluateFilteredClassifier(fc);
 				fc.buildClassifier(filteredTraining);
 				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
@@ -136,17 +124,14 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testing, training);
 				fc.setClassifier(rf);
 				fc.setFilter(smote);
-				//Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
 				Evaluation evalResult =new Evaluation(testing);
 				fc.buildClassifier(training);
 				evalResult.evaluateModel(fc, testing);
 				String[] extra = {noFilter,samplerSmote};
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerSmote};
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
 				smote.setInputFormat(filteredTraining);
 				fc.setFilter(smote);
-				//evalResult = evaluator.evaluateFilteredClassifier(fc);	
 				fc.buildClassifier(filteredTraining);
 				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
@@ -157,7 +142,6 @@ public class ClassifierEvaluation{
 				smote.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(smote);
-				//Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
 				Evaluation evalResult =new Evaluation(testing);
 				fc.buildClassifier(training);
 				evalResult.evaluateModel(fc, testing);
@@ -166,8 +150,6 @@ public class ClassifierEvaluation{
 				String[] extra2 = {filterYes,samplerSmote};
 				smote.setInputFormat(filteredTraining);
 				fc.setFilter(smote);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				//evalResult = evaluator.evaluateFilteredClassifier(fc);
 				fc.buildClassifier(filteredTraining);
 				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
@@ -188,14 +170,16 @@ public class ClassifierEvaluation{
 				resample.setInputFormat(training);
 				fc.setClassifier(nb);
 				fc.setFilter(resample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				Evaluation evalResult =new Evaluation(testing);
+				fc.buildClassifier(training);
+				evalResult.evaluateModel(fc, training);
 				String[] extra = {noFilter,samplerOverSampling};
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerOverSampling};
 				resample.setInputFormat(filteredTraining);
-				fc.setFilter(resample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				fc.setFilter(resample);	
+				fc.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 1) {
@@ -204,14 +188,16 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testing, training);
 				fc.setClassifier(rf);
 				fc.setFilter(resample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				Evaluation evalResult =new Evaluation(testing);
+				fc.buildClassifier(training);
+				evalResult.evaluateModel(fc, training);
 				String[] extra = {noFilter,samplerOverSampling};
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerOverSampling};
 				resample.setInputFormat(filteredTraining);
 				fc.setFilter(resample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);
+				fc.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 				
 			}
@@ -222,14 +208,16 @@ public class ClassifierEvaluation{
 				fc.setClassifier(ibk2);
 				fc.setFilter(resample);
 				evaluator.setTestingTraining(testing, training);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				Evaluation evalResult =new Evaluation(testing);
+				fc.buildClassifier(training);
+				evalResult.evaluateModel(fc, training);
 				String[] extra = {noFilter,samplerOverSampling};
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerOverSampling};
 				resample.setInputFormat(filteredTraining);
 				fc.setFilter(resample);
-				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				fc.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 		}
@@ -249,14 +237,19 @@ public class ClassifierEvaluation{
 				fc.setClassifier(nb);
 				evaluator.setTestingTraining(testing, training);
 				fc.setFilter(spreadSubsample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				//Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				Evaluation evalResult =new Evaluation(testing);
+				fc.buildClassifier(training);
+				evalResult.evaluateModel(fc, training);
 				String[] extra = {noFilter,samplerUnderSampling};
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerUnderSampling};
 				spreadSubsample.setInputFormat(filteredTraining);
 				fc.setFilter(spreadSubsample);
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				//evalResult = evaluator.evaluateFilteredClassifier(fc);
+				fc.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,naiveB,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			if(i == 1) {
@@ -265,14 +258,19 @@ public class ClassifierEvaluation{
 				evaluator.setTestingTraining(testing, training);
 				fc.setClassifier(rf);
 				fc.setFilter(spreadSubsample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				//Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				Evaluation evalResult =new Evaluation(testing);
+				fc.buildClassifier(training);
+				evalResult.evaluateModel(fc, training);
 				String[] extra = {noFilter,samplerUnderSampling};
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerUnderSampling};
 				spreadSubsample.setInputFormat(filteredTraining);
 				fc.setFilter(spreadSubsample);
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				//evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				fc.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,randomF,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 			
@@ -282,14 +280,19 @@ public class ClassifierEvaluation{
 				spreadSubsample.setInputFormat(training);
 				fc.setClassifier(ibk2);
 				fc.setFilter(spreadSubsample);
-				Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				//Evaluation evalResult = evaluator.evaluateFilteredClassifier(fc);
+				Evaluation evalResult =new Evaluation(testing);
+				fc.buildClassifier(training);
 				String[] extra = {noFilter,samplerUnderSampling};
+				evalResult.evaluateModel(fc, training);
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra,evalResult);
 				String[] extra2 = {filterYes,samplerUnderSampling};
 				spreadSubsample.setInputFormat(filteredTraining);
 				fc.setFilter(spreadSubsample);
 				evaluator.setTestingTraining(testingFiltered,filteredTraining);
-				evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				//evalResult = evaluator.evaluateFilteredClassifier(fc);	
+				fc.buildClassifier(filteredTraining);
+				evalResult.evaluateModel(fc, testingFiltered);
 				writeOnCsv(version,ibkStr,defectiveInTrainingPercent,defectiveInTestingPercent,extra2,evalResult);
 			}
 		}
@@ -304,6 +307,7 @@ public class ClassifierEvaluation{
 	public static void writeOnCsv(String version, String classifierName, String defectiveInTrainingPercent, String defectiveInTestingPercent,String[] extra, Evaluation eval) throws IOException {
 		String filter = extra[0];
 		String balancing = extra[1];
+		System.out.println(eval.precision(1));
 		BigDecimal precision = new BigDecimal(Double.toString(eval.precision(1)));
 		precision = precision.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal recall = new BigDecimal(Double.toString(eval.recall(1)));
