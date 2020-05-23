@@ -321,7 +321,6 @@ public class ClassifierEvaluation{
 			testingFiltered = Filter.useFilter(testing, filter);
 			testingFiltered.setClassIndex(numAttrFiltered - 1);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		resample = new Resample();
@@ -422,8 +421,8 @@ public class ClassifierEvaluation{
 	}
 	public static void main(String[] args) throws Exception{
 		//load datasets
-		projName = "OPENJPA";
-		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification2.csv"),';',
+		projName = "BOOKKEEPER";
+		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
 	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 	            CSVWriter.DEFAULT_LINE_END);
