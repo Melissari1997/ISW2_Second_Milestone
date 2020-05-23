@@ -21,6 +21,7 @@ public class GetTicketInfo {
 	   private static String fieldsStr = "fields";
 	   private static String fixVersionsStr = "fixVersions";
 	   private static String releaseDateStr = "releaseDate";
+	   private static String affectedVersions = "versions";
 	   
 	  
       public static String proportion(String fixedVersion, String openingVersion){
@@ -56,7 +57,7 @@ public class GetTicketInfo {
     	  
       }
       public static boolean computeInjectedVersion(JSONObject key, String projName) throws ParseException, JSONException, IOException {
-    	   JSONArray affectedVersion = key.getJSONObject(fieldsStr).getJSONArray("versions");
+    	   JSONArray affectedVersion = key.getJSONObject(fieldsStr).getJSONArray(affectedVersions);
     	   Date iv = null;
 		   List<Date> affectedVersionList =  new ArrayList<>(); //lista delle AV trovate quando ho risolto un bug
 		   String injectedVersion = null;
@@ -152,7 +153,6 @@ public class GetTicketInfo {
 	         JSONObject json = JiiraUtils.readJsonFromUrl(url);
 	         JSONArray issues = json.getJSONArray("issues");
 	         total = json.getInt("total");
-	         System.out.println(total);
 	         for (; i < total && i < j; i++) {
 	            //Iterate through each bug
 	        	 
@@ -161,9 +161,9 @@ public class GetTicketInfo {
 	            JSONArray fixedV = deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr));
 	            key.getJSONObject(fieldsStr).remove(fixVersionsStr);
 	            key.getJSONObject(fieldsStr).put(fixVersionsStr, fixedV);
-	            JSONArray fixedAv = deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray("versions"));
-	            key.getJSONObject(fieldsStr).remove("versions");
-	            key.getJSONObject(fieldsStr).put("versions", fixedAv);
+	            JSONArray fixedAv = deleteNonReleasedVersions(key.getJSONObject(fieldsStr).getJSONArray(affectedVersions));
+	            key.getJSONObject(fieldsStr).remove(affectedVersions);
+	            key.getJSONObject(fieldsStr).put(affectedVersions, fixedAv);
 	            String versionName = null;
             	
 	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length() == 0) {
@@ -179,7 +179,6 @@ public class GetTicketInfo {
 	            } 
 	            
 	            removeOldFixVersion(key);
-	            System.out.println(i);
 	            putInTicketList(key,versionName, ticketList,projName);
 	         } 
 	         }while(i<total);
@@ -188,7 +187,6 @@ public class GetTicketInfo {
 	   }
 	public static void putInTicketList(JSONObject key, String versionName, JSONArray ticketList, String projName) throws ParseException, JSONException, IOException {
 		if(!computeInjectedVersion(key, projName)) {
-			System.out.println("Put");
 			ticketList.put(key);
     	}
 	}
