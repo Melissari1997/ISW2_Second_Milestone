@@ -87,7 +87,7 @@ public class CreateDataset {
 	}
  
 	public static void main(String[] args) throws Exception {
-  	  String projName = "OPENJPA";;
+  	  String projName = "OPENJPA";
   	  VersionParser vp = new VersionParser();
   	  List<String> versionsList = vp.getVersionList(projName);
   	  versionsList.remove(versionsList.size()-1);
