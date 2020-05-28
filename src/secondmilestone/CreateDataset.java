@@ -57,7 +57,7 @@ public class CreateDataset {
 		return treeSha.getJSONArray("tree");
 	}
 	
-	public static void createBaseFile(String projName, List<String> versionsList,String fileName ) throws IOException, JSONException {
+	public static void createBaseFile(String projName, List<String> versionsList) throws IOException, JSONException {
 		CSVWriter csvWriter =  new CSVWriter(new FileWriter(projName + fileNameExtension),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
 	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
@@ -87,14 +87,13 @@ public class CreateDataset {
 	}
  
 	public static void main(String[] args) throws Exception {
-  	  String projName = "OPENJPA";
-  	  String fileName = projName + "VersionInfo.csv";
+  	  String projName = "OPENJPA";;
   	  VersionParser vp = new VersionParser();
   	  List<String> versionsList = vp.getVersionList(projName);
   	  versionsList.remove(versionsList.size()-1);
   	  File tmpDir = new File(projName +fileNameExtension);
 	  if ( !tmpDir.exists()) {
-		  createBaseFile(projName,versionsList,fileName);
+		  createBaseFile(projName,versionsList);
 	  }
 	  
   	  Reader reader = Files.newBufferedReader(Paths.get(projName + fileNameExtension));
@@ -102,7 +101,6 @@ public class CreateDataset {
     		',', '\'',1);
 	  List<String[]> records = csvReader.readAll();
 	  csvReader.close();
-	  System.out.println(records.size());
   	  List<String[]>result = MetricsCalculator.findBuggyness(projName, records);
 	  CSVWriter csvAddMetrics =  new CSVWriter(new FileWriter(projName + fileNameExtension),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,

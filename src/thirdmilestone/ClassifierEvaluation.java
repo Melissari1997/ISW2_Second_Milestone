@@ -309,10 +309,7 @@ public class ClassifierEvaluation{
 		testing.setClassIndex(numAttr - 1);
 		AttributeSelection filter = new AttributeSelection();
 		CfsSubsetEval eval = new CfsSubsetEval();
-		//GreedyStepwise search = new GreedyStepwise();
 		BestFirst search = new BestFirst();
-		//search.setSearchBackwards(true);
-		//set the filter to use the evaluator and search algorithm
 		filter.setEvaluator(eval);
 		filter.setSearch(search);
 		Instances filteredTraining = null;
