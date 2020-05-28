@@ -68,6 +68,9 @@ public class VersionParser {
 	 */
 	public String getVersionName(Date commitDate, String projName) throws ParseException {
 		String  result =null;
+		if(commitDate == null) {
+			return null;
+		}
 		List<String[]>  records = getRecords(projName, this.progress);
 	    for (int i = 0; i < records.size()-1; i++) {
 	        Date dateOfVersion = new SimpleDateFormat(this.dateFormat).parse(records.get(i)[3]);

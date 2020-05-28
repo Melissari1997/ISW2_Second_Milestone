@@ -3,6 +3,8 @@ package secondmilestone;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +58,7 @@ public class GetTicketInfo {
     	  return (fixedVersion != null && openingVersion!= null && injectedVersion != null && Integer.valueOf(fixedVersion)-Integer.valueOf(openingVersion) >= 1 && Integer.valueOf(openingVersion)-Integer.valueOf(injectedVersion) >= 0);
     	  
       }
-      public static boolean computeInjectedVersion(JSONObject key, String projName) throws ParseException, JSONException, IOException {
+      public static JSONObject computeInjectedVersion(JSONObject key, String projName) throws ParseException, JSONException, IOException {
     	   JSONArray affectedVersion = key.getJSONObject(fieldsStr).getJSONArray(affectedVersions);
     	   Date iv = null;
 		   List<Date> affectedVersionList =  new ArrayList<>(); //lista delle AV trovate quando ho risolto un bug
@@ -84,16 +86,16 @@ public class GetTicketInfo {
       		iv = Collections.min(affectedVersionList, (o1,o2) ->  o1.compareTo(o2));	
       		injectedVersion = vp.getVersionName(iv, projName);
       		if(iv.compareTo(new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("created"))) > 0 || openingVersion == null){
-      			return false;
+      			return null;
       	    }
       		computeP(Integer.valueOf(fixedVersion), Integer.valueOf(openingVersion), Integer.valueOf(injectedVersion));
       		key.getJSONObject(fieldsStr).put("injectedversion", injectedVersion);
-      		return true;
+      		return key;
       	   }
 	  	    injectedVersion = proportion(fixedVersion,openingVersion);
 	  	    boolean checkIv = checkIv(fixedVersion, openingVersion,injectedVersion);
 	  	    if(!checkIv) {
-	  	    	return false;
+	  	    	return null;
 	  	    }
 	      	if(affectedVersionList.isEmpty()) {
 	      		computeP(Integer.valueOf(fixedVersion), Integer.valueOf(openingVersion), Integer.valueOf(injectedVersion));
@@ -101,7 +103,7 @@ public class GetTicketInfo {
 	      	key.getJSONObject(fieldsStr).put("injectedversion", injectedVersion); 
 	      	
 	      	addAffectedVersions(injectedVersion,fixedVersion, affectedVersion);
-	        return true;
+	        return key;
       }
       
       public static JSONArray takeOnlyLastFix(JSONArray fixVersions) throws ParseException, JSONException {
@@ -138,6 +140,17 @@ public class GetTicketInfo {
          	key.getJSONObject(fieldsStr).put(fixVersionsStr, lastFix);
          }
      }
+     public static Date getFixVersion(String commitMessage, String projName) throws IOException, JSONException, ParseException {
+    	 String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
+         JSONArray object = new JSONArray(token);
+         for(int i = 0; i< object.length(); i++) {
+        	 
+        	 if(object.getJSONObject(i).getString("FixCommit").equals(commitMessage)) {
+        		 return new SimpleDateFormat(formatDate).parse(object.getJSONObject(i).getJSONObject("commit").getJSONObject("committer").getString("date"));
+        	 }
+         }
+         return null;
+     }
       
 	public static JSONArray getTicketID(String projName) throws IOException, JSONException, ParseException{
 		 
@@ -167,13 +180,15 @@ public class GetTicketInfo {
 	            String versionName = null;
             	
 	            if(key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).length() == 0) {
+	            	
 	            	JSONObject jsonresolutionDate = new JSONObject();
-	            	Date resolutionDate = new SimpleDateFormat(formatDate).parse(key.getJSONObject(fieldsStr).getString("resolutiondate")); 
+	            	Date resolutionDate = getFixVersion(key.getString("key"), projName);
 	            	versionName = vp.getVersionName(resolutionDate, projName);
 	            	
 	            	if(versionName == null) {
 	            		continue; // non considero date di ticket creati nel periodo di una versione recente non ancora rilasciata
 	            	}
+	            	
 	            	jsonresolutionDate.put("name", versionName);
 	            	key.getJSONObject(fieldsStr).getJSONArray(fixVersionsStr).put(jsonresolutionDate);
 	            } 
@@ -186,12 +201,12 @@ public class GetTicketInfo {
 	      return ticketList;
 	   }
 	public static void putInTicketList(JSONObject key,JSONArray ticketList, String projName) throws ParseException, JSONException, IOException {
-		if(!computeInjectedVersion(key, projName)) {
+		if(computeInjectedVersion(key, projName) != null) {
 			ticketList.put(key);
     	}
 	}
 	public static void main(String[] args) throws IOException, JSONException, ParseException {
-		String projName = "BOOKKEEPER";
+		String projName = "OPENJPA";
 		FileWriter file = new FileWriter(projName +"_TicketInfo.JSON");
 	    JSONArray resultJSONArray = getTicketID(projName);
 	      try {

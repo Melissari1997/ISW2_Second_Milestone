@@ -32,6 +32,7 @@ public class CreateDataset {
 		
 		    List<String[]>  records = csvReader.readAll();
 		    for (int i = 0; i < records.size(); i++) {
+		    	
 	    		if(records.get(i)[0].equals(version)) {
 		    		 result = GithubConnector.readJsonFromUrl("https://api.github.com/repos/apache/"+ projName+"/commits/" + records.get(i)[4]);
 		    		
@@ -64,7 +65,7 @@ public class CreateDataset {
 
 	     csvWriter.writeNext( new String[] {"FileName","Version Name","#Revision","#FixCommit","Size","Churn", "MaxChurn","AvgChurn","ChgSetSize","MaxChgSetSize","AvgChgSetSize","Buggy"});
 	  	  for( String version :versionsList) {
-	  	  	  JSONArray treeSha = getTreeSha(projName, fileName);
+	  	  	  JSONArray treeSha = getTreeSha(projName, version);
 	  	  	  if(treeSha == null) {
 	  	  		  continue;
 	  	  	  }
@@ -86,7 +87,7 @@ public class CreateDataset {
 	}
  
 	public static void main(String[] args) throws Exception {
-  	  String projName = "BOOKKEEPER";
+  	  String projName = "OPENJPA";
   	  String fileName = projName + "VersionInfo.csv";
   	  VersionParser vp = new VersionParser();
   	  List<String> versionsList = vp.getVersionList(projName);
@@ -95,15 +96,13 @@ public class CreateDataset {
 	  if ( !tmpDir.exists()) {
 		  createBaseFile(projName,versionsList,fileName);
 	  }
-  	  /*
-  	   * Leggo tutto il extended commit e mi fermo ogni volta che ho una fix commit.
-  	   * Vedo quali erano i file commitati, e per loro vedo se son
-  	   */
+	  
   	  Reader reader = Files.newBufferedReader(Paths.get(projName + fileNameExtension));
 	  CSVReader csvReader = new CSVReader(reader,';',
     		',', '\'',1);
 	  List<String[]> records = csvReader.readAll();
 	  csvReader.close();
+	  System.out.println(records.size());
   	  List<String[]>result = MetricsCalculator.findBuggyness(projName, records);
 	  CSVWriter csvAddMetrics =  new CSVWriter(new FileWriter(projName + fileNameExtension),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
@@ -114,6 +113,7 @@ public class CreateDataset {
 	  csvAddMetrics.writeAll(result);
 	  csvAddMetrics.flush();
 	  csvAddMetrics.close();
+	  
 
    }
 	

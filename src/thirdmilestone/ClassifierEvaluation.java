@@ -15,8 +15,8 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import secondmilestone.VersionParser;
+import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
-import weka.attributeSelection.GreedyStepwise;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.trees.RandomForest;
@@ -28,7 +28,6 @@ import weka.filters.supervised.instance.SMOTE;
 import weka.filters.supervised.instance.SpreadSubsample;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.meta.FilteredClassifier;
-
 
 
 
@@ -290,11 +289,15 @@ public class ClassifierEvaluation{
 		precision = precision.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal recall = new BigDecimal(Double.toString(eval.recall(1)));
 		recall = recall.setScale(2, RoundingMode.HALF_UP);
-		BigDecimal auc = new BigDecimal(Double.toString(eval.areaUnderPRC(1)));
+		BigDecimal f1 = new BigDecimal(Double.toString(eval.fMeasure(1)));
+		f1 = f1.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal auc = new BigDecimal(Double.toString(eval.areaUnderROC(1)));
 		auc = auc.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal prc = new BigDecimal(Double.toString(eval.areaUnderPRC(1)));
+		prc = prc.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal kappa = new BigDecimal(Double.toString(eval.kappa()));
 		kappa = kappa.setScale(2, RoundingMode.HALF_UP);
-		csvWriter.writeNext(new String[] {projName,version, classifierName,String.valueOf(trainingPerc),defectiveInTrainingPercent,defectiveInTestingPercent,filter, balancing,  String.valueOf(precision), String.valueOf(recall), String.valueOf(auc),String.valueOf(kappa)});
+		csvWriter.writeNext(new String[] {projName,version, classifierName,String.valueOf(trainingPerc),defectiveInTrainingPercent,defectiveInTestingPercent,filter, balancing,  String.valueOf(precision), String.valueOf(recall), String.valueOf(f1), String.valueOf(prc),String.valueOf(auc),String.valueOf(kappa)});
 		csvWriter.flush();
 	}
 	
@@ -306,8 +309,9 @@ public class ClassifierEvaluation{
 		testing.setClassIndex(numAttr - 1);
 		AttributeSelection filter = new AttributeSelection();
 		CfsSubsetEval eval = new CfsSubsetEval();
-		GreedyStepwise search = new GreedyStepwise();
-		search.setSearchBackwards(true);
+		//GreedyStepwise search = new GreedyStepwise();
+		BestFirst search = new BestFirst();
+		//search.setSearchBackwards(true);
 		//set the filter to use the evaluator and search algorithm
 		filter.setEvaluator(eval);
 		filter.setSearch(search);
@@ -421,12 +425,12 @@ public class ClassifierEvaluation{
 	}
 	public static void main(String[] args) throws Exception{
 		//load datasets
-		projName = "BOOKKEEPER";
+		projName = "OPENJPA";
 		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
 	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 	            CSVWriter.DEFAULT_LINE_END);
-		csvWriter.writeNext(new String[] {"Dataset", "#Training" , "Classifier","%training", "%defective in training", "%defective in testing", "Feature Selection","Balancing", "Precision", "Recall", "AUC", "Kappa"});
+		csvWriter.writeNext(new String[] {"Dataset", "#Training" , "Classifier","%training", "%defective in training", "%defective in testing", "Feature Selection","Balancing", "Precision", "Recall","F1","AUPRC","ROC_Area", "Kappa"});
 		VersionParser vp = new VersionParser();
 		vp.setProgress(0.5);
 		List<String> versionsList = vp.getVersionList(projName);

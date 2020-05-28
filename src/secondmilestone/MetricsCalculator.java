@@ -2,6 +2,8 @@ package secondmilestone;
 
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -112,6 +114,7 @@ public class MetricsCalculator {
 		for(int i = 0; i< affectedVersions.length(); i++) {
 			if(affectedVersions.getJSONObject(i).has("name")) {
 				versionID = affectedVersions.getJSONObject(i).getString("name");
+				
 			}else {
 			 Date versionDate = new SimpleDateFormat("yyyy-MM-dd").parse(affectedVersions.getJSONObject(i).getString("releaseDate"));
 			 versionID = vp.getVersionName(versionDate, projName);
@@ -155,15 +158,21 @@ public class MetricsCalculator {
 		VersionParser vp = new VersionParser();
     	List<String> versionsList = vp.getVersionList(projName);
     	versionsList.remove(versionsList.size()-1);
+    	
     	HashMap<String,JSONArray> listTreeSha = new HashMap<>();
     	for(int k = 0; k < versionsList.size(); k ++) {
-    		CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv");
-    		listTreeSha.put(versionsList.get(k),CreateDataset.getTreeSha(projName, projName + "VersionInfo.csv"));
+    		listTreeSha.put(versionsList.get(k), CreateDataset.getTreeSha(projName,versionsList.get(k)));
     	}
+    	int iterations = 0;
+    	versionsList.clear();
+    	versionsList.add("13");
 		for(String version: versionsList) {
         		JSONArray treeSha =listTreeSha.get(version);
         		try {
                     for ( int i = 0; i < treeSha.length(); i++) {
+                    	iterations++;
+                    	if(iterations >= 27752)
+                    		break;
                         String type = treeSha.getJSONObject(i).getString("type");
                         if(type.equals("blob") && treeSha.getJSONObject(i).getString("path").contains(".java")) {
                         	computeLoc(projName,version, treeSha.getJSONObject(i).getString("sha"),treeSha.getJSONObject(i).getString("path"), fileRecords);
@@ -177,11 +186,21 @@ public class MetricsCalculator {
 		
 		
 	}
+	public static void sumRevisionsAndFixes(List<String[]> fileRecords) throws JSONException {
+        for (int i = 0; i < fileRecords.size(); i++) {
+	    	for(int j = 0; j< fileRecords.size(); j++) {
+	    		if(fileRecords.get(i)[0].equals(fileRecords.get(j)[0]) && Integer.parseInt(fileRecords.get(j)[1]) == (Integer.parseInt(fileRecords.get(i)[1])+1)) {
+	    			fileRecords.get(j)[2] = String.valueOf(Integer.parseInt(fileRecords.get(j)[2]) + Integer.parseInt(fileRecords.get(i)[2]));
+	    			fileRecords.get(j)[3] = String.valueOf(Integer.parseInt(fileRecords.get(j)[3]) + Integer.parseInt(fileRecords.get(i)[3])); 
+	    		}
+	    	}
+	    }  
+	}
 
 	public static List<String[]> findBuggyness(String projName, List<String[]> fileRecords) throws JSONException, IOException, ParseException  {
 		String token = new String(Files.readAllBytes(Paths.get(projName + "_Extended_Commits_Sha.JSON")));
         JSONArray object = new JSONArray(token);
-        int total = object.length();
+        int total = object.length(); 
         for(int i = 0; i< total ; i++) {
         	String fixCommit =object.getJSONObject(i).getString(fixCommitStr);
         	updateNumberOfRevision(object.getJSONObject(i),fileRecords);
@@ -192,12 +211,20 @@ public class MetricsCalculator {
         		searchInTicketList(projName, fixCommit, fileRecords);
         	}
         }
+        
         for(int i = 0; i < fileRecords.size(); i++) {
         	if(Integer.valueOf(fileRecords.get(i)[2])>0) {
-        		fileRecords.get(i)[7] = String.valueOf(Integer.valueOf(fileRecords.get(i)[5])/Integer.valueOf(fileRecords.get(i)[2]));
-        		fileRecords.get(i)[10] = String.valueOf(Integer.valueOf(fileRecords.get(i)[8])/Integer.valueOf(fileRecords.get(i)[2]));
+        		BigDecimal churnAvg = new BigDecimal(Double.toString(Double.valueOf(fileRecords.get(i)[5])/Double.valueOf(fileRecords.get(i)[2])));
+        		churnAvg = churnAvg.setScale(2, RoundingMode.HALF_UP);
+        		fileRecords.get(i)[7] = String.valueOf(churnAvg);
+        		BigDecimal chgSetSizeAvg = new BigDecimal(Double.toString(Double.valueOf(fileRecords.get(i)[8])/Double.valueOf(fileRecords.get(i)[2])));
+        		chgSetSizeAvg = chgSetSizeAvg.setScale(2, RoundingMode.HALF_UP);
+        		fileRecords.get(i)[10] = String.valueOf(chgSetSizeAvg);
         	}
         }
+        
+
+        sumRevisionsAndFixes(fileRecords); 
         writeSize(projName, fileRecords);
        
         return fileRecords;
