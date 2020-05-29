@@ -10,8 +10,13 @@
     <property name="source" value="1.8"/>
     <path id="ISW2_Second_Deliverable.classpath">
         <pathelement location="bin"/>
-        <pathelement location="../../ISW2_Second_Deliverable/java-json.jar"/>
-        <pathelement location="../../ISW2_Second_Deliverable/opencsv-3.4.jar"/>
+        <pathelement location="org.eclipse.jgit-5.7.0.202003110725-r.jar"/>
+        <pathelement location="weka.jar"/>
+        <pathelement location="java-json.jar"/>
+        <pathelement location="remoteExperimentServer.jar"/>
+        <pathelement location="weka-src.jar"/>
+        <pathelement location="opencsv-3.4.jar"/>
+        <pathelement location="SMOTE-1.0.3.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -49,18 +54,69 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="GetAllCommits (1)">
-        <java classname="secondmilestone.GetAllCommits" failonerror="true" fork="yes">
-            <classpath refid="ISW2_Second_Deliverable.classpath"/>
-        </java>
-    </target>
-    <target name="GithubConnector">
-        <java classname="secondmilestone.GithubConnector" failonerror="true" fork="yes">
+    <target name="ClassifierEvaluation">
+        <java classname="thirdmilestone.ClassifierEvaluation" failonerror="true" fork="yes">
             <classpath refid="ISW2_Second_Deliverable.classpath"/>
         </java>
     </target>
     <target name="CreateDataset (2)">
         <java classname="secondmilestone.CreateDataset" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="example">
+        <java classname="thirdmilestone.example" failonerror="true" fork="yes">
+            <arg line="&quot;BOOKKEEPERDataset.csv&quot;, BOOKKEEPERDataset2.arff"/>
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="FinalEval">
+        <java classname="thirdmilestone.FinalEval" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="GetAllCommits (1)">
+        <java classname="secondmilestone.GetAllCommits" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="GetTicketInfo (1)">
+        <java classname="secondmilestone.GetTicketInfo" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="getVersionInfo">
+        <java classname="secondmilestone.GetVersionInfo" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="githubConnector">
+        <java classname="secondmilestone.GithubConnector" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="TestWekaEasy">
+        <java classname="thirdmilestone.TestWekaEasy" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="TestWekaFeatureSelection (1)">
+        <java classname="thirdmilestone.TestWekaFeatureSelection" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="TestWekaSampling (1)">
+        <java classname="thirdmilestone.TestWekaSampling" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="VersionParser (1)">
+        <java classname="secondmilestone.VersionParser" failonerror="true" fork="yes">
+            <classpath refid="ISW2_Second_Deliverable.classpath"/>
+        </java>
+    </target>
+    <target name="WalkForwardDataSetGenerator">
+        <java classname="thirdmilestone.WalkForwardDataSetGenerator" failonerror="true" fork="yes">
             <classpath refid="ISW2_Second_Deliverable.classpath"/>
         </java>
     </target>
