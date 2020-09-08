@@ -422,7 +422,7 @@ public class ClassifierEvaluation{
 	}
 	public static void main(String[] args) throws Exception{
 		//load datasets
-		projName = "OPENJPA";
+		projName = "BOOKKEEPER";
 		csvWriter =  new CSVWriter(new FileWriter(projName + "Classification.csv"),';',
 	            CSVWriter.NO_QUOTE_CHARACTER,
 	            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
